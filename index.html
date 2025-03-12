@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerenciador de Receitas com Timers</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .conteudo {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .coluna {
+      padding: 10px;
+      overflow-y: auto;
+    }
+
+    .busca-receitas {
+      width: 20%;
+      border-right: 1px solid #ccc;
+    }
+
+    .visualizacao-receita {
+      width: 60%;
+      border-right: 1px solid #ccc;
+    }
+
+    .fila-producao {
+      width: 20%;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    input[type="text"] {
+      width: calc(100% - 50px);
+      padding: 8px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      padding: 5px;
+      margin-bottom: 5px;
+      border: 1px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    li span {
+      flex: 1;
+    }
+
+    li button {
+      margin-left: 2px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button {
+      padding: 6px 12px;
+      margin: 5px 2px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .timers {
+      padding: 10px;
+      border-top: 1px solid #ccc;
+      display: flex;
+      justify-content: space-around;
+      background-color: #f9f9f9;
+    }
+    
+    .timer {
+      text-align: center;
+    }
+
+    .timer-adjust {
+      font-size: 24px;
+      padding: 10px 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="conteudo">
+    <div class="coluna busca-receitas">
+      <h2>Buscar Receitas</h2>
+      <input type="text" id="search" placeholder="Buscar receita...">
+      <button onclick="buscarReceitas()">OK</button>
+      <button onclick="voltarGrupo()">Voltar</button>
+      <button onclick="exibirGrupo('Setores')">Home</button>
+      <ul id="listaReceitas"></ul>
+    </div>
+
+    <div class="coluna visualizacao-receita">
+      <h2>Visualização da Receita</h2>
+      <div id="conteudoReceita">
+        <p>Selecione uma receita para visualizar aqui.</p>
+      </div>
+      <button onclick="adicionarFila()">Adicionar à Fila de Produção</button>
+    </div>
+
+    <div class="coluna fila-producao">
+      <h2>Fila de Produção</h2>
+      <ul id="filaProducao"></ul>
+    </div>
+  </div>
+
+  <div class="timers">
+    <script>
+      // Cria 5 timers dinamicamente
+      for(let i = 1; i <= 5; i++) {
+        document.write(`<div class="timer" id="timer${i}">
+          <span id="display${i}">00:00</span><br>
+          <button class="timer-adjust" onclick="changeTime(${i},60)">+</button>
+          <button class="timer-adjust" onclick="changeTime(${i},-60)">-</button><br>
+          <button onclick="startTimer(${i})">Iniciar</button>
+          <button onclick="pauseTimer(${i})">Pausar</button>
+          <button onclick="resetTimer(${i})">Reiniciar</button>
+        </div>`);
+      }
+    </script>
+  </div>
+
+  <script>
+    // Dados das receitas
+    const receitas = {
+      "Setores": ["Cremes", "Recheios de Fogo", "Massas"],
+      "Cremes": ["Creme Branco", "Creme de Chocolate"],
+      "Recheios de Fogo": ["Brigadeiro", "Beijinho"],
+      "Massas": ["Pão de Ló Branco", "Pão de Ló Preto"]
+    };
+
+    let grupoAtual = "Setores";
+    let receitaSelecionada = '';
+
+    function exibirGrupo(grupo) {
+      grupoAtual = grupo;
+      const itens = receitas[grupo];
+      document.getElementById('listaReceitas').innerHTML = itens.map(item =>
+        `<li onclick="${receitas[item] ? 'exibirGrupo' : 'mostrarReceita'}('${item}')">${item}</li>`
+      ).join('');
+    }
+
+    function voltarGrupo() {
+      exibirGrupo("Setores");
+    }
+
+    function buscarReceitas() {
+      const termo = document.getElementById('search').value.toLowerCase();
+      let resultados = [];
+      for(let grupo in receitas) {
+        receitas[grupo].forEach(receita => {
+          if(receita.toLowerCase().includes(termo)) resultados.push(receita);
+        });
+      }
+      document.getElementById('listaReceitas').innerHTML = resultados.map(r =>
+        `<li onclick="mostrarReceita('${r}')">${r}</li>`
+      ).join('');
+    }
+
+    function mostrarReceita(receita) {
+      receitaSelecionada = receita;
+      document.getElementById('conteudoReceita').innerHTML = `<h3>${receita}</h3>`;
+    }
+
+    function adicionarFila() {
+      if (receitaSelecionada) {
+        const li = document.createElement('li');
+        // Cria o span para o nome da receita
+        const span = document.createElement('span');
+        span.textContent = receitaSelecionada;
+        li.appendChild(span);
+
+        // Botão para subir o item na lista
+        const btnUp = document.createElement('button');
+        btnUp.textContent = "↑";
+        btnUp.onclick = () => moverItem(li, "up");
+        li.appendChild(btnUp);
+
+        // Botão para descer o item na lista
+        const btnDown = document.createElement('button');
+        btnDown.textContent = "↓";
+        btnDown.onclick = () => moverItem(li, "down");
+        li.appendChild(btnDown);
+
+        // Botão para remover o item
+        const btnRemove = document.createElement('button');
+        btnRemove.textContent = "Remover";
+        btnRemove.onclick = () => li.remove();
+        li.appendChild(btnRemove);
+
+        document.getElementById('filaProducao').appendChild(li);
+      } else {
+        alert("Selecione uma receita primeiro.");
+      }
+    }
+
+    // Função para mover o item na fila
+    function moverItem(item, direcao) {
+      const ul = document.getElementById('filaProducao');
+      if (direcao === "up" && item.previousElementSibling) {
+        ul.insertBefore(item, item.previousElementSibling);
+      } else if (direcao === "down" && item.nextElementSibling) {
+        ul.insertBefore(item.nextElementSibling, item);
+      }
+    }
+
+    // Inicializa a visualização do grupo "Setores"
+    exibirGrupo("Setores");
+
+    // Funções dos Timers
+    const timersData = {}; // Armazena os dados de cada timer
+
+    function updateDisplay(timerId) {
+      const timerObj = timersData[timerId];
+      const display = document.getElementById("display" + timerId);
+      const minutes = Math.floor(timerObj.time / 60).toString().padStart(2, '0');
+      const seconds = (timerObj.time % 60).toString().padStart(2, '0');
+      display.textContent = `${minutes}:${seconds}`;
+    }
+
+    function changeTime(timerId, delta) {
+      if (!timersData[timerId]) {
+        timersData[timerId] = { time: 0, intervalId: null };
+      }
+      timersData[timerId].time += delta;
+      if (timersData[timerId].time < 0) timersData[timerId].time = 0;
+      updateDisplay(timerId);
+    }
+
+    function startTimer(timerId) {
+      if (!timersData[timerId]) {
+        timersData[timerId] = { time: 0, intervalId: null };
+      }
+      if (timersData[timerId].intervalId) return; // Evita iniciar mais de uma vez
+      timersData[timerId].intervalId = setInterval(() => {
+        if (timersData[timerId].time > 0) {
+          timersData[timerId].time--;
+          updateDisplay(timerId);
+        } else {
+          pauseTimer(timerId);
+        }
+      }, 1000);
+    }
+
+    function pauseTimer(timerId) {
+      if (timersData[timerId] && timersData[timerId].intervalId) {
+        clearInterval(timersData[timerId].intervalId);
+        timersData[timerId].intervalId = null;
+      }
+    }
+
+    function resetTimer(timerId) {
+      pauseTimer(timerId);
+      timersData[timerId].time = 0;
+      updateDisplay(timerId);
+    }
+  </script>
+</body>
+</html>
