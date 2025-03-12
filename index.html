@@ -64,11 +64,12 @@
       font-size: 14px;
     }
 
-    /* Esconde o conteúdo principal até o login ser efetuado */
+    /* Conteúdo Principal - Oculto até o login */
     #mainContent {
       display: none;
       flex-direction: column;
       height: 100vh;
+      width: 100%;
     }
 
     /* Estilos do gerenciador */
@@ -83,18 +84,19 @@
       overflow-y: auto;
     }
 
+    /* Ajuste das proporções: 25% / 50% / 25% */
     .busca-receitas {
-      width: 20%;
+      width: 25%;
       border-right: 1px solid #ccc;
     }
 
     .visualizacao-receita {
-      width: 60%;
+      width: 50%;
       border-right: 1px solid #ccc;
     }
 
     .fila-producao {
-      width: 20%;
+      width: 25%;
     }
 
     h2 {
@@ -155,6 +157,13 @@
     .timer-adjust {
       font-size: 24px;
       padding: 10px 16px;
+    }
+    
+    /* Estilo para descrição da receita */
+    .descricao {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #555;
     }
   </style>
 </head>
@@ -227,12 +236,21 @@
         }
       }
   
-      // Dados das receitas
+      // Dados das receitas e suas descrições
       const receitas = {
         "Setores": ["Cremes", "Recheios de Fogo", "Massas"],
         "Cremes": ["Creme Branco", "Creme de Chocolate"],
         "Recheios de Fogo": ["Brigadeiro", "Beijinho"],
         "Massas": ["Pão de Ló Branco", "Pão de Ló Preto"]
+      };
+      
+      const descricoes = {
+        "Creme Branco": "Um creme suave e versátil, ideal para sobremesas e salgados.",
+        "Creme de Chocolate": "Delicioso creme com sabor intenso de chocolate.",
+        "Brigadeiro": "Clássico doce brasileiro, irresistível em qualquer ocasião.",
+        "Beijinho": "Doce tradicional com coco, perfeito para festas.",
+        "Pão de Ló Branco": "Bolo leve e aerado, perfeito para receber um café.",
+        "Pão de Ló Preto": "Versão mais intensa do clássico pão de ló."
       };
   
       let grupoAtual = "Setores";
@@ -265,7 +283,12 @@
   
       function mostrarReceita(receita) {
         receitaSelecionada = receita;
-        document.getElementById('conteudoReceita').innerHTML = `<h3>${receita}</h3>`;
+        // Utiliza a descrição específica se existir ou um texto padrão
+        const descricao = descricoes[receita] || "Esta receita é deliciosa e tradicional. Experimente!";
+        document.getElementById('conteudoReceita').innerHTML = `
+          <h3>${receita}</h3>
+          <p class="descricao">${descricao}</p>
+        `;
       }
   
       function adicionarFila() {
