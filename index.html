@@ -1,386 +1,2478 @@
-<!DOCTYPE html>
+```html
+<!doctype html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gerenciador de Receitas com Login</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cais</title>
   <style>
-    /* Estilos gerais */
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background: #f0f2f5;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    :root{
+      --bg:#f6f8fb;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border:#e6eaf0;
+      --accent:#0b2a5b;
+      --accent2:#1e4ea8; /* azul do logo */
+      --danger:#b91c1c;
+      --shadow: 0 10px 25px rgba(15,23,42,.08);
+      --r:16px;
+
+      --hdrBg: rgba(246,248,251,.92);
+      --btnBg:#ffffff;
+      --btnText:#0f172a;
     }
 
-    /* Estilos para a área de login */
-    #loginContainer {
-      background: #fff;
-      padding: 40px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      width: 100%;
-      max-width: 360px;
-      text-align: center;
+    :root[data-theme="dark"]{
+      --bg:#0b1220;
+      --card:#0f172a;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --border:#22314a;
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+
+      --hdrBg: rgba(11,18,32,.86);
+      --btnBg:#0b1220;
+      --btnText:#e5e7eb;
     }
 
-    #loginContainer h2 {
-      margin-bottom: 20px;
-      color: #333;
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:var(--bg);
+      color:var(--text);
+    }
+    button,input,select,textarea{font:inherit}
+    a{color:inherit}
+
+    .app{min-height:100%; display:flex; flex-direction:column}
+    header{
+      position:sticky; top:0; z-index:5;
+      background:var(--hdrBg);
+      backdrop-filter:saturate(150%) blur(8px);
+      border-bottom:1px solid var(--border);
+    }
+    .bar{
+      max-width:1200px; margin:0 auto; padding:14px 16px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .brand{display:flex; align-items:center; gap:10px; min-width:180px}
+    .logoBox{
+      width:38px; height:38px; border-radius:14px;
+      overflow:hidden; border:1px solid var(--border);
+      background:#eef2ff;
+      display:grid; place-items:center;
+      box-shadow: 0 6px 14px rgba(15,23,42,.06);
+      flex:0 0 auto;
+      font-weight:900;
+      color:var(--accent2);
+      user-select:none;
+    }
+    :root[data-theme="dark"] .logoBox{
+      background:rgba(30,78,168,.18);
+      box-shadow: 0 10px 20px rgba(0,0,0,.25);
     }
 
-    #loginContainer input {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 16px;
+    .titleWrap{display:flex; flex-direction:column; line-height:1.1}
+    .brandName{font-weight:800; letter-spacing:.2px}
+    .screenTitle{font-size:12px; color:var(--muted)}
+    .actions{
+      display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    #headerActions{
+      display:flex; gap:8px; align-items:center; flex-wrap:wrap;
     }
 
-    #loginContainer button {
-      width: 100%;
-      padding: 12px;
-      background: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.3s ease;
+    main{max-width:1200px; margin:0 auto; width:100%; padding:18px 16px 40px}
+    .grid{display:grid; gap:12px}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .spacer{flex:1}
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      box-shadow:var(--shadow);
+      padding:14px;
+    }
+    .card h2,.card h3{margin:0 0 8px 0}
+    .muted{color:var(--muted)}
+    .btn{
+      border:1px solid var(--border);
+      background:var(--btnBg);
+      color:var(--btnText);
+      padding:10px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      transition:.15s transform ease,.15s border-color ease, .15s filter ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:hover{transform:translateY(-1px); border-color:#d5dbe5}
+    :root[data-theme="dark"] .btn:hover{border-color:#2f425f}
+    .btn:active{transform:translateY(0)}
+    .btn.primary{border-color:transparent; background:var(--accent); color:#fff;}
+    .btn.primary:hover{filter:brightness(1.06)}
+    .btn.blueBig{
+      border-color:transparent; background:var(--accent2); color:#fff;
+      padding:16px 18px; border-radius:14px; font-size:16px; font-weight:800;
+    }
+    .btn.blueBig:hover{filter:brightness(1.06)}
+    .btn.danger{border-color:#f2c9c9; background:#fff5f5; color:var(--danger)}
+    :root[data-theme="dark"] .btn.danger{background:rgba(185,28,28,.12); border-color:rgba(185,28,28,.35); color:#fecaca}
+    .btn.small{padding:8px 10px; border-radius:10px; font-size:13px}
+    .btn.openBtn{padding:10px 14px; font-size:14px; font-weight:800; border-radius:12px}
+
+    .nightBtn{
+      display:inline-flex; align-items:center; gap:8px;
+      font-weight:800;
     }
 
-    #loginContainer button:hover {
-      background: #0056b3;
+    .input, .select, .textarea{
+      width:100%;
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:10px 12px;
+      background:var(--btnBg);
+      color:var(--btnText);
+      outline:none;
+    }
+    .textarea{min-height:84px; resize:vertical}
+    .input:focus,.select:focus,.textarea:focus{border-color:#c7d2fe; box-shadow:0 0 0 3px rgba(30,78,168,.12)}
+    .label{font-size:12px; color:var(--muted); margin:10px 0 6px}
+    .hint{font-size:12px; color:var(--muted)}
+    .hr{height:1px;background:var(--border);margin:12px 0}
+
+    .list{display:flex; flex-direction:column; gap:10px}
+    .item{
+      display:flex; gap:12px; align-items:center;
+      padding:12px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:var(--card);
+    }
+    .item:hover{border-color:#d5dbe5}
+    :root[data-theme="dark"] .item:hover{border-color:#2f425f}
+
+    .icon{
+      width:54px; height:54px; border-radius:18px;
+      background:#eaf0ff;
+      display:grid; place-items:center;
+      overflow:hidden;
+      border:1px solid var(--border);
+      flex:0 0 auto;
+    }
+    :root[data-theme="dark"] .icon{background:rgba(30,78,168,.14)}
+    .icon img{width:100%; height:100%; object-fit:cover}
+
+    .badge{
+      font-size:11px; padding:4px 8px; border-radius:999px;
+      background:#eef2ff; color:#1e40af; border:1px solid #e0e7ff;
+    }
+    :root[data-theme="dark"] .badge{
+      background:rgba(30,78,168,.16);
+      border-color:rgba(30,78,168,.28);
+      color:#bfdbfe;
     }
 
-    #loginError {
-      color: #e74c3c;
-      margin-top: 10px;
-      font-size: 14px;
+    .mono{font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+
+    .split{display:grid; grid-template-columns: 1fr; gap:12px;}
+    @media (min-width:900px){ .split{grid-template-columns: 1.1fr .9fr;} }
+
+    .crumbs{display:flex; gap:6px; flex-wrap:wrap; align-items:center}
+    .crumb{
+      border:1px solid var(--border);
+      background:var(--btnBg);
+      color:var(--btnText);
+      padding:6px 10px;
+      border-radius:999px;
+      cursor:pointer;
+      font-size:13px;
+    }
+    .crumb:last-child{background:#eef2ff; border-color:#e0e7ff; color:#1e40af; cursor:default}
+    :root[data-theme="dark"] .crumb:last-child{
+      background:rgba(30,78,168,.16);
+      border-color:rgba(30,78,168,.28);
+      color:#bfdbfe;
     }
 
-    /* Conteúdo Principal - Oculto até o login */
-    #mainContent {
-      display: none;
-      flex-direction: column;
-      height: 100vh;
-      width: 100%;
+    .searchBox{position:relative; width:min(520px, 100%)}
+    .results{
+      position:absolute; top:44px; left:0; right:0;
+      background:var(--card); border:1px solid var(--border);
+      border-radius:14px; box-shadow:var(--shadow);
+      overflow:hidden;
+      z-index:10;
+      max-height:320px;
+      overflow:auto;
+      display:none;
+    }
+    .resRow{padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border);}
+    .resRow:hover{background:rgba(100,116,139,.08)}
+    .resRow:last-child{border-bottom:none}
+    .resTitle{font-weight:700}
+    .resPath{font-size:12px; color:var(--muted); margin-top:2px}
+
+    .overlay{
+      position:fixed; inset:0; background:rgba(15,23,42,.45);
+      display:none; align-items:center; justify-content:center;
+      padding:18px;
+      z-index:20;
+    }
+    .overlay.show{display:flex}
+    .modal{
+      width:min(720px, 100%);
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .modalHead{
+      padding:14px 14px 10px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      border-bottom:1px solid var(--border);
+    }
+    .modalBody{padding:14px}
+    .modalFoot{
+      padding:12px 14px;
+      border-top:1px solid var(--border);
+      display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;
     }
 
-    /* Estilos do gerenciador */
-    .conteudo {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
+    .splash{
+      position:fixed; inset:0; z-index:50;
+      display:grid; place-items:center;
+      background:#0a1630;
+    }
+    .splash img{
+      width:min(920px, 92vw);
+      border-radius:18px;
+      box-shadow:0 25px 70px rgba(0,0,0,.45);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .splash.hide{display:none}
+
+    .goSetupGrid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+    @media (min-width:520px){
+      .goSetupGrid{ grid-template-columns: 2fr 1fr; }
     }
 
-    .coluna {
-      padding: 10px;
-      overflow-y: auto;
+    /* GO vertical (tablet portrait): topo sistema | embaixo pedidos */
+    .goVWrap{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      height: calc(100vh - 160px);
+      min-height: 520px;
+    }
+    .goTopPane{
+      flex:1;
+      min-height:0;
+      overflow:auto;
     }
 
-    /* Ajuste das proporções: 25% / 50% / 25% */
-    .busca-receitas {
-      width: 25%;
-      border-right: 1px solid #ccc;
+    /* Pedidos redimensionável com alça */
+    .pedWrap{
+      flex:0 0 auto;
+      height: 50%;
+      min-height: 44px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      padding:10px;
+    }
+    .pedHandle{
+      height: 22px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor: ns-resize;
+      user-select:none;
+      touch-action:none;
+      margin: -2px 0 6px;
+    }
+    .pedHandle .bar{
+      width: 84px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent2); /* azul do logo */
+      border: 1px solid rgba(255,255,255,.2);
+      box-shadow: 0 10px 22px rgba(30,78,168,.18);
+    }
+    .pedInner{
+      flex:1;
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .panelHead{
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    }
+    .panelTitle{font-weight:900; font-size:16px}
+    .panelSub{font-size:12px; color:var(--muted)}
+
+    /* Dentro do painel: A fazer 2/3 e Concluídos 1/3 em vertical */
+    .panelBody{
+      flex:1;
+      min-height:0;
+      display:grid;
+      grid-template-rows: 2fr 1fr;
+      gap:10px;
+    }
+    .panelBox{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:8px;              /* compacto */
+      background:var(--card);
+      overflow:auto;
+      min-height:0;
     }
 
-    .visualizacao-receita {
-      width: 50%;
-      border-right: 1px solid #ccc;
+    .miniRow{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+    .pill{
+      font-size:11px; padding:4px 8px; border-radius:999px;
+      background:rgba(100,116,139,.10);
+      border:1px solid var(--border);
+      color:var(--muted);
+      white-space:nowrap;
     }
 
-    .fila-producao {
-      width: 25%;
+    /* Cards ultra compactos */
+    .orderCard{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:8px;
+      background:var(--card);
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-top:6px;
     }
 
-    h2 {
-      text-align: center;
+    /* Linha corrida horizontal */
+    .orderLine{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .orderInfo{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex:1;
+      min-width:0;
     }
 
-    input[type="text"] {
-      width: calc(100% - 50px);
-      padding: 8px;
-      margin-bottom: 10px;
-      box-sizing: border-box;
+    /* ✅ Qtd: pequeno + 3x mesmo destaque do nome */
+    .qtyLabel{
+      font-size:11px;
+      color:var(--muted);
+      font-weight:800;
+      white-space:nowrap;
+    }
+    .qtyValue{
+      font-weight:900;
+      font-size:14px;
+      color:var(--text);
+      white-space:nowrap;
     }
 
-    ul {
-      list-style: none;
-      padding: 0;
+    .orderTitleInline{
+      font-weight:900;
+      font-size:14px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: clamp(150px, 22vw, 260px);
+    }
+    .orderPathInline{
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      flex:1;
+      min-width:120px;
+      max-width: clamp(160px, 36vw, 520px);
     }
 
-    li {
-      padding: 5px;
-      margin-bottom: 5px;
-      border: 1px solid #ccc;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    /* ✅ Ações compactas, touch-friendly */
+    .orderActions{
+      display:flex;
+      gap:8px;
+      flex-wrap:nowrap;
+      align-items:center;
+      justify-content:flex-end;
+      flex:0 0 auto;
+    }
+    .iconBtn{
+      width:44px; height:44px;           /* touch target bom */
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:var(--btnBg);
+      color:var(--btnText);
+      cursor:pointer;
+      display:grid;
+      place-items:center;
+      font-size:18px;
+      font-weight:900;
+      line-height:1;
+      user-select:none;
+    }
+    .iconBtn:hover{border-color:#d5dbe5}
+    :root[data-theme="dark"] .iconBtn:hover{border-color:#2f425f}
+    .iconBtn:disabled{opacity:.45; cursor:not-allowed}
+    .iconBtn.p{background:rgba(30,78,168,.16); border-color:rgba(30,78,168,.28); color:#bfdbfe}
+    .iconBtn.d{background:rgba(185,28,28,.12); border-color:rgba(185,28,28,.35); color:#fecaca}
+
+    .orderNote{
+      font-size:12px;
+      color:var(--text);
+      opacity:.92;
+      white-space:pre-wrap;
+      margin-top:0;
     }
 
-    li span {
-      flex: 1;
+    /* Colapsado (5%): esconde conteúdo, deixa só alça + mini info */
+    .pedWrap[data-collapsed="1"] .pedInner{display:none;}
+    .pedCollapsedInfo{
+      display:none;
+      font-size:12px;
+      color:var(--muted);
+      padding:0 4px 2px;
     }
-
-    li button {
-      margin-left: 2px;
-      padding: 4px 8px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    button {
-      padding: 6px 12px;
-      margin: 5px 2px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    .timers {
-      padding: 10px;
-      border-top: 1px solid #ccc;
-      display: flex;
-      justify-content: space-around;
-      background-color: #f9f9f9;
-    }
-    
-    .timer {
-      text-align: center;
-    }
-    
-    .timer-adjust {
-      font-size: 24px;
-      padding: 10px 16px;
-    }
-    
-    /* Estilo para descrição da receita */
-    .descricao {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #555;
-    }
+    .pedWrap[data-collapsed="1"] .pedCollapsedInfo{display:block;}
   </style>
 </head>
 <body>
-
-  <!-- Tela de Login -->
-  <div id="loginContainer">
-    <h2>Login</h2>
-    <input type="text" id="username" placeholder="Usuário">
-    <input type="password" id="password" placeholder="Senha">
-    <button onclick="fazerLogin()">Entrar</button>
-    <p id="loginError"></p>
+  <!-- Mesma pasta do index.html:
+       1) Logo open Cais.png
+  -->
+  <div id="splash" class="splash">
+    <img src="Logo open Cais.png" alt="Cais Splash" />
   </div>
 
-  <!-- Conteúdo Principal -->
-  <div id="mainContent">
-    <div class="conteudo">
-      <div class="coluna busca-receitas">
-        <h2>Buscar Receitas</h2>
-        <input type="text" id="search" placeholder="Buscar receita...">
-        <button onclick="buscarReceitas()">OK</button>
-        <button onclick="voltarGrupo()">Voltar</button>
-        <button onclick="exibirGrupo('Setores')">Home</button>
-        <ul id="listaReceitas"></ul>
-      </div>
-  
-      <div class="coluna visualizacao-receita">
-        <h2>Visualização da Receita</h2>
-        <div id="conteudoReceita">
-          <p>Selecione uma receita para visualizar aqui.</p>
+  <div class="app" id="app" style="display:none">
+    <header>
+      <div class="bar">
+        <div class="brand">
+          <div class="logoBox" title="Cais">C</div>
+          <div class="titleWrap">
+            <div class="brandName">Cais</div>
+            <div class="screenTitle" id="screenTitle">Dashboard</div>
+          </div>
         </div>
-        <button onclick="adicionarFila()">Adicionar à Fila de Produção</button>
+
+        <div class="actions">
+          <button id="nightToggle" class="btn small nightBtn" type="button" title="Alternar modo noturno">
+            🌙 <span id="nightLabel">Cais Noturno</span>
+          </button>
+          <div id="headerActions"></div>
+        </div>
       </div>
-  
-      <div class="coluna fila-producao">
-        <h2>Fila de Produção</h2>
-        <ul id="filaProducao"></ul>
-      </div>
-    </div>
-  
-    <div class="timers">
-      <script>
-        // Cria 5 timers dinamicamente
-        for(let i = 1; i <= 5; i++) {
-          document.write(`<div class="timer" id="timer${i}">
-            <span id="display${i}">00:00</span><br>
-            <button class="timer-adjust" onclick="changeTime(${i},60)">+</button>
-            <button class="timer-adjust" onclick="changeTime(${i},-60)">-</button><br>
-            <button onclick="startTimer(${i})">Iniciar</button>
-            <button onclick="pauseTimer(${i})">Pausar</button>
-            <button onclick="resetTimer(${i})">Reiniciar</button>
-          </div>`);
-        }
-      </script>
-    </div>
-  
-    <script>
-      // Função de Login
-      function fazerLogin() {
-        const usuario = document.getElementById('username').value;
-        const senha = document.getElementById('password').value;
-        const erro = document.getElementById('loginError');
-        if (usuario === 'duascerejas' && senha === '121212') {
-          // Esconde a tela de login e exibe o conteúdo principal
-          document.getElementById('loginContainer').style.display = 'none';
-          document.getElementById('mainContent').style.display = 'flex';
-          exibirGrupo("Setores"); // Inicializa a visualização
-        } else {
-          erro.textContent = "Usuário ou senha incorretos.";
-        }
-      }
-  
-      // Dados das receitas e suas descrições
-      const receitas = {
-        "Setores": ["Cremes", "Recheios de Fogo", "Massas"],
-        "Cremes": ["Creme Branco", "Creme de Chocolate"],
-        "Recheios de Fogo": ["Brigadeiro", "Beijinho"],
-        "Massas": ["Pão de Ló Branco", "Pão de Ló Preto"]
-      };
-      
-      const descricoes = {
-        "Creme Branco": "Um creme suave e versátil, ideal para sobremesas e salgados.",
-        "Creme de Chocolate": "Delicioso creme com sabor intenso de chocolate.",
-        "Brigadeiro": "Clássico doce brasileiro, irresistível em qualquer ocasião.",
-        "Beijinho": "Doce tradicional com coco, perfeito para festas.",
-        "Pão de Ló Branco": "Bolo leve e aerado, perfeito para receber um café.",
-        "Pão de Ló Preto": "Versão mais intensa do clássico pão de ló."
-      };
-  
-      let grupoAtual = "Setores";
-      let receitaSelecionada = '';
-  
-      function exibirGrupo(grupo) {
-        grupoAtual = grupo;
-        const itens = receitas[grupo];
-        document.getElementById('listaReceitas').innerHTML = itens.map(item =>
-          `<li onclick="${receitas[item] ? 'exibirGrupo' : 'mostrarReceita'}('${item}')">${item}</li>`
-        ).join('');
-      }
-  
-      function voltarGrupo() {
-        exibirGrupo("Setores");
-      }
-  
-      function buscarReceitas() {
-        const termo = document.getElementById('search').value.toLowerCase();
-        let resultados = [];
-        for(let grupo in receitas) {
-          receitas[grupo].forEach(receita => {
-            if(receita.toLowerCase().includes(termo)) resultados.push(receita);
-          });
-        }
-        document.getElementById('listaReceitas').innerHTML = resultados.map(r =>
-          `<li onclick="mostrarReceita('${r}')">${r}</li>`
-        ).join('');
-      }
-  
-      function mostrarReceita(receita) {
-        receitaSelecionada = receita;
-        // Utiliza a descrição específica se existir ou um texto padrão
-        const descricao = descricoes[receita] || "Esta receita é deliciosa e tradicional. Experimente!";
-        document.getElementById('conteudoReceita').innerHTML = `
-          <h3>${receita}</h3>
-          <p class="descricao">${descricao}</p>
-        `;
-      }
-  
-      function adicionarFila() {
-        if (receitaSelecionada) {
-          const li = document.createElement('li');
-          // Cria o span para o nome da receita
-          const span = document.createElement('span');
-          span.textContent = receitaSelecionada;
-          li.appendChild(span);
-  
-          // Botão para subir o item na lista
-          const btnUp = document.createElement('button');
-          btnUp.textContent = "↑";
-          btnUp.onclick = () => moverItem(li, "up");
-          li.appendChild(btnUp);
-  
-          // Botão para descer o item na lista
-          const btnDown = document.createElement('button');
-          btnDown.textContent = "↓";
-          btnDown.onclick = () => moverItem(li, "down");
-          li.appendChild(btnDown);
-  
-          // Botão para remover o item
-          const btnRemove = document.createElement('button');
-          btnRemove.textContent = "Remover";
-          btnRemove.onclick = () => li.remove();
-          li.appendChild(btnRemove);
-  
-          document.getElementById('filaProducao').appendChild(li);
-        } else {
-          alert("Selecione uma receita primeiro.");
-        }
-      }
-  
-      // Função para mover o item na fila
-      function moverItem(item, direcao) {
-        const ul = document.getElementById('filaProducao');
-        if (direcao === "up" && item.previousElementSibling) {
-          ul.insertBefore(item, item.previousElementSibling);
-        } else if (direcao === "down" && item.nextElementSibling) {
-          ul.insertBefore(item.nextElementSibling, item);
-        }
-      }
-  
-      // Funções dos Timers
-      const timersData = {};
-  
-      function updateDisplay(timerId) {
-        const timerObj = timersData[timerId];
-        const display = document.getElementById("display" + timerId);
-        const minutes = Math.floor(timerObj.time / 60).toString().padStart(2, '0');
-        const seconds = (timerObj.time % 60).toString().padStart(2, '0');
-        display.textContent = `${minutes}:${seconds}`;
-      }
-  
-      function changeTime(timerId, delta) {
-        if (!timersData[timerId]) {
-          timersData[timerId] = { time: 0, intervalId: null };
-        }
-        timersData[timerId].time += delta;
-        if (timersData[timerId].time < 0) timersData[timerId].time = 0;
-        updateDisplay(timerId);
-      }
-  
-      function startTimer(timerId) {
-        if (!timersData[timerId]) {
-          timersData[timerId] = { time: 0, intervalId: null };
-        }
-        if (timersData[timerId].intervalId) return;
-        timersData[timerId].intervalId = setInterval(() => {
-          if (timersData[timerId].time > 0) {
-            timersData[timerId].time--;
-            updateDisplay(timerId);
-          } else {
-            pauseTimer(timerId);
-          }
-        }, 1000);
-      }
-  
-      function pauseTimer(timerId) {
-        if (timersData[timerId] && timersData[timerId].intervalId) {
-          clearInterval(timersData[timerId].intervalId);
-          timersData[timerId].intervalId = null;
-        }
-      }
-  
-      function resetTimer(timerId) {
-        pauseTimer(timerId);
-        timersData[timerId].time = 0;
-        updateDisplay(timerId);
-      }
-    </script>
+    </header>
+    <main id="view"></main>
   </div>
+
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="modalHead">
+        <div style="font-weight:800" id="modalTitle">Modal</div>
+        <button class="btn small" onclick="UI.modal(false)">Fechar</button>
+      </div>
+      <div class="modalBody" id="modalBody"></div>
+      <div class="modalFoot" id="modalFoot"></div>
+    </div>
+  </div>
+
+<script>
+const LS_KEY = "cais_v1";
+const THEME_KEY = "cais_theme";
+const CAIS_JS_MAGIC = "CAIS_EXPORT_V1";
+const CAIS_EXPORT_EXT = ".js";
+const ORDER_STEP_MIN = 5;
+
+/* Pedidos: livre 20%..80%, e para ocultar puxe abaixo de 20% (vira 5%) */
+const PED_MIN = 20;
+const PED_MAX = 80;
+const PED_HIDDEN = 5;
+const PED_COLLAPSE_THRESHOLD = 10;
+
+const ID = () => crypto?.randomUUID ? crypto.randomUUID() : ("id_" + Math.random().toString(16).slice(2));
+const nowISO = () => new Date().toISOString();
+const localDateKey = () => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+};
+
+/* ========== TEMA (Cais Noturno) ========== */
+function getTheme(){
+  return (localStorage.getItem(THEME_KEY) || "light") === "dark" ? "dark" : "light";
+}
+function applyTheme(mode){
+  const m = (mode === "dark") ? "dark" : "light";
+  document.documentElement.dataset.theme = m;
+  localStorage.setItem(THEME_KEY, m);
+  const label = document.getElementById("nightLabel");
+  if(label) label.textContent = (m === "dark") ? "Cais Noturno: ON" : "Cais Noturno: OFF";
+}
+function toggleTheme(){
+  applyTheme(getTheme() === "dark" ? "light" : "dark");
+}
+
+const DB = {
+  load(){
+    try{
+      const raw = localStorage.getItem(LS_KEY);
+      if(!raw) return DB.seed();
+      const data = JSON.parse(raw);
+      if(!data || data.version !== 1) return DB.seed();
+      return data;
+    }catch(e){ return DB.seed(); }
+  },
+  save(data){ localStorage.setItem(LS_KEY, JSON.stringify(data)); },
+  seed(){
+    const data = { version:1, companies:[], imports:{ folders:[], cais:[] } };
+    DB.save(data);
+    return data;
+  }
+};
+
+const store = {
+  data: DB.load(),
+  route: { name:"home" },
+  ctx: { companyId:null, imported:false, nodePath:[], importFolderId:null }
+};
+
+const UI = {
+  el: (id)=>document.getElementById(id),
+  setTitle(t){ UI.el("screenTitle").textContent = t; },
+  setHeaderActions(nodes){
+    const host = UI.el("headerActions");
+    host.innerHTML = "";
+    (nodes||[]).forEach(n=>host.appendChild(n));
+  },
+  btn(text, cls, onClick){
+    const b=document.createElement("button");
+    b.className="btn "+(cls||"");
+    b.textContent=text;
+    b.onclick=onClick;
+    return b;
+  },
+  input(type, id, placeholder){
+    const i=document.createElement("input");
+    i.className="input";
+    i.type=type||"text";
+    if(id) i.id=id;
+    if(placeholder) i.placeholder=placeholder;
+    return i;
+  },
+  modal(show, {title="", body=null, foot=null}={}){
+    const ov = UI.el("overlay");
+    if(!show){
+      ov.classList.remove("show");
+      UI.el("modalBody").innerHTML="";
+      UI.el("modalFoot").innerHTML="";
+      return;
+    }
+    UI.el("modalTitle").textContent = title || "Cais";
+    const bodyHost = UI.el("modalBody");
+    const footHost = UI.el("modalFoot");
+    bodyHost.innerHTML=""; footHost.innerHTML="";
+    if(body) bodyHost.appendChild(body);
+    if(foot) foot.forEach(x=>footHost.appendChild(x));
+    ov.classList.add("show");
+  },
+  toast(msg){ alert(msg); }
+};
+
+/* util: mover item */
+function moveItem(arr, from, to){
+  if(!arr || from===to || from<0 || to<0 || from>=arr.length || to>=arr.length) return;
+  const it = arr.splice(from,1)[0];
+  arr.splice(to,0,it);
+}
+
+/* migração leve */
+function ensureCompanyDefaults(c){
+  if(typeof c.opPinHash !== "string") c.opPinHash = "";
+  if(!c.root) c.root = makeRootSetores();
+  if(!c.goSettings) c.goSettings = { pedidosEnabled:true };
+  if(typeof c.goSettings.pedidosEnabled !== "boolean") c.goSettings.pedidosEnabled = true;
+
+  if(typeof c.goSettings.pedidosPanelPct !== "number") c.goSettings.pedidosPanelPct = PED_MIN;
+  if(typeof c.goSettings.pedidosPanelPctLast !== "number") c.goSettings.pedidosPanelPctLast = PED_MIN;
+  if(!c.ordersByDate) c.ordersByDate = {};
+}
+function migrateData(){
+  const d = store.data;
+
+  (d.companies||[]).forEach(ensureCompanyDefaults);
+  (d.imports?.cais||[]).forEach(ensureCompanyDefaults);
+
+  (d.imports?.folders||[]).forEach(f=>{
+    if(typeof f.icon !== "string") f.icon = "";
+    if(typeof f.color !== "string") f.color = "#eef2ff";
+    if(!Array.isArray(f.caisIds)) f.caisIds = [];
+  });
+
+  DB.save(d);
+}
+
+/* hash */
+async function sha256(text){
+  const enc = new TextEncoder().encode(text);
+  const buf = await crypto.subtle.digest("SHA-256", enc);
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+/* PIN prompts */
+async function askPIN(title="PIN"){
+  return new Promise((resolve)=>{
+    const wrap=document.createElement("div");
+    wrap.innerHTML = `
+      <div class="label">${title}</div>
+      <input class="input" id="pinInp" type="password" inputmode="numeric" placeholder="Digite o PIN" />
+      <div class="hint" style="margin-top:8px">Use o PIN para continuar.</div>
+    `;
+    const ok = UI.btn("Confirmar","primary", ()=>{
+      const v = wrap.querySelector("#pinInp").value.trim();
+      UI.modal(false);
+      resolve(v || null);
+    });
+    const cancel = UI.btn("Cancelar","", ()=>{ UI.modal(false); resolve(null); });
+    UI.modal(true,{title:"Acesso", body:wrap, foot:[cancel, ok]});
+    setTimeout(()=>wrap.querySelector("#pinInp")?.focus(), 50);
+  });
+}
+
+/* gates */
+async function gateByMaster(company){
+  if(!company?.pinHash) return true;
+  const pin = await askPIN("PIN Master");
+  if(!pin) return false;
+  return (await sha256(pin)) === company.pinHash;
+}
+async function gateByOperatorOrMaster(company){
+  if(!company?.opPinHash) return true;
+  const pin = await askPIN("PIN Operador");
+  if(!pin) return false;
+  const h = await sha256(pin);
+  return h === company.opPinHash || (!!company.pinHash && h === company.pinHash);
+}
+
+/* Helpers */
+function getCompany(id, imported=false){
+  if(imported) return store.data.imports.cais.find(c=>c.id===id) || null;
+  return store.data.companies.find(c=>c.id===id) || null;
+}
+function save(){ DB.save(store.data); render(); }
+
+function iconNode({icon, color, name}){
+  const d=document.createElement("div");
+  d.className="icon";
+  if(icon){
+    const img=document.createElement("img");
+    img.src=icon;
+    d.appendChild(img);
+  }else{
+    d.style.background = color || "#eaf0ff";
+    d.style.color = "var(--accent)";
+    d.style.fontWeight = "900";
+    d.style.fontSize = "18px";
+    d.textContent = (name||"?").trim().slice(0,1).toUpperCase();
+  }
+  return d;
+}
+function fmtType(mime){
+  if(!mime) return "Arquivo";
+  if(mime.startsWith("image/")) return "Imagem";
+  if(mime.startsWith("video/")) return "Vídeo";
+  return "Arquivo";
+}
+function pinsLabel(c){
+  const a = [];
+  if(c?.pinHash) a.push("Master");
+  if(c?.opPinHash) a.push("Operador");
+  return a.length ? `PIN: ${a.join(" + ")}` : "Sem PIN";
+}
+
+/* Tree */
+function makeRootSetores(){
+  return { id:ID(), name:"Setores", color:"#eaf0ff", icon:"", children:[], files:[] };
+}
+function findNode(root, nodeId){
+  if(root.id===nodeId) return root;
+  for(const c of (root.children||[])){
+    const f = findNode(c, nodeId);
+    if(f) return f;
+  }
+  return null;
+}
+function nodePathToCrumbs(company){
+  const crumbs = [{ id: company.root.id, name: company.root.name }];
+  for(const nid of store.ctx.nodePath){
+    const n = findNode(company.root, nid);
+    if(n) crumbs.push({id:n.id, name:n.name});
+  }
+  return crumbs;
+}
+function currentNode(company){
+  if(!store.ctx.nodePath.length) return company.root;
+  const last = store.ctx.nodePath[store.ctx.nodePath.length-1];
+  return findNode(company.root, last) || company.root;
+}
+
+/* Fuzzy */
+function norm(s){ return (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim(); }
+function levenshtein(a,b){
+  a=norm(a); b=norm(b);
+  const m=a.length, n=b.length;
+  if(!m) return n; if(!n) return m;
+  const dp = new Array(n+1);
+  for(let j=0;j<=n;j++) dp[j]=j;
+  for(let i=1;i<=m;i++){
+    let prev=dp[0]; dp[0]=i;
+    for(let j=1;j<=n;j++){
+      const temp=dp[j];
+      const cost = a[i-1]===b[j-1] ? 0 : 1;
+      dp[j]=Math.min(dp[j]+1, dp[j-1]+1, prev+cost);
+      prev=temp;
+    }
+  }
+  return dp[n];
+}
+function scoreMatch(query, target){
+  query = norm(query); target = norm(target);
+  if(!query || !target) return 0;
+  if(target.includes(query)) return 1;
+  const d = levenshtein(query, target);
+  const mx = Math.max(query.length, target.length) || 1;
+  return 1 - (d / mx);
+}
+function indexTree(company){
+  const out=[];
+  function walk(node, pathNames, pathIds){
+    out.push({kind:"node", name:node.name, pathNames:[...pathNames, node.name], pathIds:[...pathIds, node.id], nodeId:node.id});
+    (node.files||[]).forEach(f=>{
+      out.push({kind:"file", name:f.name, mime:f.mime, fileId:f.id, pathNames:[...pathNames, node.name, f.name], pathIds:[...pathIds, node.id], nodeId:node.id});
+    });
+    (node.children||[]).forEach(ch=>walk(ch, [...pathNames, node.name], [...pathIds, node.id]));
+  }
+  walk(company.root, [], []);
+  return out;
+}
+
+/* Router */
+function go(route, ctxPatch={}){
+  store.route = route;
+  Object.assign(store.ctx, ctxPatch);
+  render();
+}
+
+/* Import/Export JS */
+function buildExportJS(payload){
+  const json = JSON.stringify(payload);
+  return `// CAIS_EXPORT_V1\n// Gerado pelo app Cais\nconst CAIS_EXPORT = ${json};\nexport default CAIS_EXPORT;\n`;
+}
+function parseExportJS(text){
+  let t = (text || "").replace(/^\uFEFF/, "").trim();
+  if(!t.includes("CAIS_EXPORT_V1")) throw new Error("Arquivo não é do Cais.");
+  const start = t.indexOf("{");
+  const end = t.lastIndexOf("}");
+  if(start < 0 || end < 0 || end <= start) throw new Error("Conteúdo inválido.");
+  return JSON.parse(t.slice(start, end + 1));
+}
+
+/* Orders */
+function ordersToday(company){
+  ensureCompanyDefaults(company);
+  const key = localDateKey();
+  if(!company.ordersByDate[key]) company.ordersByDate[key] = { open:[], done:[] };
+  return { key, bucket: company.ordersByDate[key] };
+}
+function addOrder(company, recipe){
+  const { bucket } = ordersToday(company);
+  bucket.open.push({
+    id: ID(),
+    createdAt: nowISO(),
+    nodeId: recipe.nodeId,
+    title: recipe.title,
+    path: recipe.path,
+    qty: recipe.qty,
+    minutes: recipe.minutes,
+    note: recipe.note || ""
+  });
+}
+function completeOrder(company, orderId){
+  const { bucket } = ordersToday(company);
+  const idx = (bucket.open||[]).findIndex(x=>x.id===orderId);
+  if(idx<0) return;
+  const it = bucket.open.splice(idx,1)[0];
+  it.doneAt = nowISO();
+  bucket.done = bucket.done || [];
+  bucket.done.unshift(it);
+}
+function uncompleteOrder(company, orderId){
+  const { bucket } = ordersToday(company);
+  const idx = (bucket.done||[]).findIndex(x=>x.id===orderId);
+  if(idx<0) return;
+  const it = bucket.done.splice(idx,1)[0];
+  delete it.doneAt;
+  bucket.open = bucket.open || [];
+  bucket.open.unshift(it);
+}
+function deleteOrder(company, orderId){
+  const { bucket } = ordersToday(company);
+  bucket.open = (bucket.open||[]).filter(x=>x.id!==orderId);
+  bucket.done = (bucket.done||[]).filter(x=>x.id!==orderId);
+}
+function moveOrder(company, orderId, dir){
+  const { bucket } = ordersToday(company);
+  const arr = bucket.open || [];
+  const idx = arr.findIndex(x=>x.id===orderId);
+  if(idx<0) return;
+  const to = idx + dir;
+  moveItem(arr, idx, to);
+}
+
+/* Pedidos resizer (alça) */
+function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+function applyPedidosHeight(company, pedWrap, pct, {persist=true}={}){
+  ensureCompanyDefaults(company);
+  const v = clamp(pct, PED_HIDDEN, PED_MAX);
+
+  company.goSettings.pedidosPanelPct = v;
+  if(v >= PED_MIN) company.goSettings.pedidosPanelPctLast = v;
+
+  pedWrap.style.height = v + "%";
+  pedWrap.dataset.collapsed = (v <= PED_COLLAPSE_THRESHOLD) ? "1" : "0";
+
+  if(persist) DB.save(store.data);
+}
+
+function attachPedidosResizer(company, goWrap, pedWrap, handle){
+  ensureCompanyDefaults(company);
+
+  let init = company.goSettings.pedidosPanelPct ?? PED_MIN;
+  if(init < PED_HIDDEN) init = PED_MIN;
+  if(init > PED_MAX) init = PED_MAX;
+  if(init > PED_HIDDEN && init < PED_MIN) init = PED_MIN;
+
+  applyPedidosHeight(company, pedWrap, init);
+
+  let dragging=false;
+  let startY=0;
+  let startPct=company.goSettings.pedidosPanelPct ?? PED_MIN;
+
+  handle.addEventListener("pointerdown", (e)=>{
+    dragging=true;
+    startY = e.clientY;
+
+    const cur = company.goSettings.pedidosPanelPct ?? PED_MIN;
+    startPct = (cur <= PED_COLLAPSE_THRESHOLD) ? (company.goSettings.pedidosPanelPctLast ?? PED_MIN) : cur;
+
+    handle.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+
+  handle.addEventListener("pointermove", (e)=>{
+    if(!dragging) return;
+    const rect = goWrap.getBoundingClientRect();
+    const dy = startY - e.clientY;
+    const dPct = (dy / rect.height) * 100;
+
+    let pct = clamp(startPct + dPct, PED_HIDDEN, PED_MAX);
+
+    pedWrap.style.height = pct + "%";
+    pedWrap.dataset.collapsed = (pct <= PED_COLLAPSE_THRESHOLD) ? "1" : "0";
+    pedWrap.__tmpPct = pct;
+  });
+
+  const finish = ()=>{
+    if(!dragging) return;
+    dragging=false;
+
+    let pct = pedWrap.__tmpPct ?? (company.goSettings.pedidosPanelPct ?? PED_MIN);
+    pct = clamp(pct, PED_HIDDEN, PED_MAX);
+
+    if(pct < PED_MIN){
+      applyPedidosHeight(company, pedWrap, PED_HIDDEN);
+    }else{
+      applyPedidosHeight(company, pedWrap, pct);
+    }
+
+    pedWrap.__tmpPct = null;
+  };
+
+  handle.addEventListener("pointerup", finish);
+  handle.addEventListener("pointercancel", finish);
+}
+
+/* cleanup importados */
+function cleanupImportedCais(){
+  const used = new Set();
+  (store.data.imports.folders||[]).forEach(f => (f.caisIds||[]).forEach(id => used.add(id)));
+  store.data.imports.cais = (store.data.imports.cais||[]).filter(c => used.has(c.id));
+}
+
+/* deletar */
+function deleteCompany(companyId){
+  const c = store.data.companies.find(x=>x.id===companyId);
+  if(!c) return;
+  if(!confirm(`Excluir "${c.name}"? (não tem volta)`)) return;
+  store.data.companies = store.data.companies.filter(x=>x.id!==companyId);
+  DB.save(store.data);
+  go({name:"home"},{companyId:null, imported:false, nodePath:[]});
+}
+function deleteImportFolder(folderId){
+  const f = store.data.imports.folders.find(x=>x.id===folderId);
+  if(!f) return;
+  if(!confirm(`Excluir pasta "${f.name}" e remover os Cais dentro dela?`)) return;
+  store.data.imports.folders = store.data.imports.folders.filter(x=>x.id!==folderId);
+  cleanupImportedCais();
+  save();
+}
+function deleteImportedCaisFromFolder(folderId, caisId){
+  const f = store.data.imports.folders.find(x=>x.id===folderId);
+  if(!f) return;
+  const c = store.data.imports.cais.find(x=>x.id===caisId);
+  const name = c?.name || "Cais";
+  if(!confirm(`Remover "${name}" desta pasta?`)) return;
+  f.caisIds = (f.caisIds||[]).filter(id=>id!==caisId);
+  cleanupImportedCais();
+  save();
+}
+
+/* fingerprint import */
+async function companyFingerprint(company){
+  const clone = JSON.parse(JSON.stringify(company || {}));
+  delete clone.id;
+  delete clone.createdAt;
+  delete clone.importedAt;
+  delete clone.fingerprint;
+  return sha256(JSON.stringify(clone));
+}
+
+/* ========= VIEWS ========= */
+function viewHome(){
+  UI.setTitle("Dashboard");
+  UI.setHeaderActions([ UI.btn("Criar Empresa/Projeto","primary", ()=>openCreateCompany()) ]);
+
+  const wrap=document.createElement("div");
+  wrap.className="grid";
+  wrap.style.gap="16px";
+
+  const cardA=document.createElement("div");
+  cardA.className="card";
+  cardA.innerHTML = `<h2>Minhas Empresas</h2><div class="muted">Crie e organize seus projetos.</div>`;
+
+  const list=document.createElement("div");
+  list.className="list";
+
+  const companies=[...store.data.companies];
+  companies.forEach((c, idx)=>{
+    const it=document.createElement("div");
+    it.className="item";
+    it.appendChild(iconNode(c));
+
+    const mid=document.createElement("div"); mid.className="spacer";
+    mid.innerHTML = `<div style="font-weight:800">${c.name}</div>
+      <div class="muted" style="font-size:12px">${pinsLabel(c)}</div>`;
+
+    const controls=document.createElement("div"); controls.className="row";
+    controls.appendChild(UI.btn("Abrir","openBtn primary", ()=>go({name:"companyDash"},{companyId:c.id, imported:false, nodePath:[]})));
+    controls.appendChild(UI.btn("↑","small", ()=>{
+      if(idx===0) return;
+      moveItem(store.data.companies, idx, idx-1);
+      save();
+    }));
+    controls.appendChild(UI.btn("↓","small", ()=>{
+      if(idx===store.data.companies.length-1) return;
+      moveItem(store.data.companies, idx, idx+1);
+      save();
+    }));
+    controls.appendChild(UI.btn("Excluir","small danger", ()=>deleteCompany(c.id)));
+
+    it.appendChild(mid);
+    it.appendChild(controls);
+    list.appendChild(it);
+  });
+
+  if(!companies.length){
+    const empty=document.createElement("div");
+    empty.className="muted";
+    empty.style.padding="12px 2px";
+    empty.textContent="Nenhuma empresa criada ainda.";
+    list.appendChild(empty);
+  }
+
+  cardA.appendChild(document.createElement("div")).style.height="12px";
+  cardA.appendChild(list);
+
+  const cardB=document.createElement("div");
+  cardB.className="card";
+  const head=document.createElement("div");
+  head.className="row";
+
+  const fixedIcon=document.createElement("div");
+  fixedIcon.className="icon";
+  fixedIcon.style.background="rgba(30,78,168,.12)";
+  fixedIcon.innerHTML = `<span style="font-weight:900;color:var(--accent2);font-size:18px">⇄</span>`;
+  head.appendChild(fixedIcon);
+
+  const htxt=document.createElement("div");
+  htxt.innerHTML = `<h2 style="margin:0">Cais Importados</h2><div class="muted" style="margin-top:2px">Pastas com Cais recebidos.</div>`;
+  head.appendChild(htxt);
+
+  head.appendChild(document.createElement("div")).className="spacer";
+  head.appendChild(UI.btn("Abrir","primary", ()=>go({name:"imports"})));
+  cardB.appendChild(head);
+
+  wrap.appendChild(cardA);
+  wrap.appendChild(cardB);
+  return wrap;
+}
+
+function viewImports(){
+  UI.setTitle("Cais Importados");
+  UI.setHeaderActions([
+    UI.btn("Voltar","", ()=>go({name:"home"})),
+    UI.btn("Criar Pasta","primary", ()=>openCreateImportFolder()),
+    UI.btn("Importar Cais","", ()=>openImportCais())
+  ]);
+
+  const wrap=document.createElement("div");
+  wrap.className="card";
+  wrap.innerHTML = `<h2>Pastas</h2><div class="muted">Organize os Cais importados por pasta.</div>`;
+
+  const list=document.createElement("div");
+  list.className="list";
+
+  (store.data.imports.folders||[]).forEach(f=>{
+    const it=document.createElement("div");
+    it.className="item";
+    it.appendChild(iconNode(f));
+
+    const mid=document.createElement("div"); mid.className="spacer";
+    mid.innerHTML = `<div style="font-weight:800">${f.name}</div>
+      <div class="muted" style="font-size:12px">${(f.caisIds||[]).length} Cais</div>`;
+
+    const controls=document.createElement("div"); controls.className="row";
+    controls.appendChild(UI.btn("Abrir","openBtn primary", ()=>go({name:"importFolder"},{importFolderId:f.id})));
+    controls.appendChild(UI.btn("Editar","", ()=>openEditImportFolder(f)));
+    controls.appendChild(UI.btn("Excluir","danger", ()=>deleteImportFolder(f.id)));
+
+    it.appendChild(mid);
+    it.appendChild(controls);
+    list.appendChild(it);
+  });
+
+  if(!(store.data.imports.folders||[]).length){
+    const empty=document.createElement("div");
+    empty.className="muted";
+    empty.style.padding="12px 2px";
+    empty.textContent="Crie uma pasta para começar a importar.";
+    list.appendChild(empty);
+  }
+
+  wrap.appendChild(document.createElement("div")).style.height="12px";
+  wrap.appendChild(list);
+  return wrap;
+}
+
+function viewImportFolder(){
+  const folder = store.data.imports.folders.find(f=>f.id===store.ctx.importFolderId);
+  UI.setTitle(folder ? folder.name : "Pasta");
+  UI.setHeaderActions([
+    UI.btn("Voltar","", ()=>go({name:"imports"})),
+    folder ? UI.btn("Editar Pasta","", ()=>openEditImportFolder(folder)) : null,
+    UI.btn("Importar Cais","primary", ()=>openImportCais(folder?.id)),
+    folder ? UI.btn("Excluir Pasta","danger", ()=>deleteImportFolder(folder.id)) : null
+  ].filter(Boolean));
+
+  const wrap=document.createElement("div");
+  wrap.className="card";
+  if(!folder){
+    wrap.innerHTML = `<h2>Pasta não encontrada</h2>`;
+    return wrap;
+  }
+
+  wrap.innerHTML = `<h2>${folder.name}</h2><div class="muted">Cais dentro desta pasta.</div>`;
+  const list=document.createElement("div"); list.className="list";
+
+  const ids = folder.caisIds || [];
+  const cais = ids.map(id=>store.data.imports.cais.find(c=>c.id===id)).filter(Boolean);
+
+  cais.forEach((c, idx)=>{
+    const it=document.createElement("div");
+    it.className="item";
+    it.appendChild(iconNode(c));
+
+    const mid=document.createElement("div"); mid.className="spacer";
+    mid.innerHTML = `<div style="font-weight:800">${c.name}</div>
+      <div class="muted" style="font-size:12px">${pinsLabel(c)} · Importado</div>`;
+
+    const controls=document.createElement("div"); controls.className="row";
+    controls.appendChild(UI.btn("Abrir","openBtn primary", ()=>go({name:"companyDash"},{companyId:c.id, imported:true, nodePath:[]})));
+
+    controls.appendChild(UI.btn("↑","small", ()=>{
+      if(idx===0) return;
+      moveItem(folder.caisIds, idx, idx-1);
+      save();
+    }));
+    controls.appendChild(UI.btn("↓","small", ()=>{
+      if(idx===folder.caisIds.length-1) return;
+      moveItem(folder.caisIds, idx, idx+1);
+      save();
+    }));
+
+    controls.appendChild(UI.btn("Excluir","small danger", ()=>deleteImportedCaisFromFolder(folder.id, c.id)));
+
+    it.appendChild(mid);
+    it.appendChild(controls);
+    list.appendChild(it);
+  });
+
+  if(!cais.length){
+    const empty=document.createElement("div");
+    empty.className="muted";
+    empty.style.padding="12px 2px";
+    empty.textContent="Nenhum Cais aqui ainda.";
+    list.appendChild(empty);
+  }
+
+  wrap.appendChild(document.createElement("div")).style.height="12px";
+  wrap.appendChild(list);
+  return wrap;
+}
+
+function viewCompanyDash(){
+  const company = getCompany(store.ctx.companyId, store.ctx.imported);
+  UI.setTitle(company ? company.name : "Empresa");
+
+  UI.setHeaderActions([
+    UI.btn("Voltar","", ()=> store.ctx.imported ? go({name:"imports"}) : go({name:"home"})),
+    UI.btn("Exportar Cais","", ()=>exportCompany(company)),
+    (!store.ctx.imported && company) ? UI.btn("Excluir","danger", ()=>deleteCompany(company.id)) : null
+  ].filter(Boolean));
+
+  const wrap=document.createElement("div");
+  wrap.className="split";
+
+  const left=document.createElement("div");
+  left.className="card";
+
+  const topRow=document.createElement("div"); topRow.className="row";
+  topRow.appendChild(iconNode(company||{name:"?"}));
+  const tx=document.createElement("div");
+  tx.innerHTML = `<div style="font-weight:900; font-size:18px">${company?.name||"Não encontrado"}</div>
+    <div class="muted">${pinsLabel(company)} ${store.ctx.imported ? "· Importado" : ""}</div>`;
+  topRow.appendChild(tx);
+  left.appendChild(topRow);
+
+  const actions=document.createElement("div");
+  actions.className="goSetupGrid";
+
+  actions.appendChild(UI.btn("Cais Go","blueBig", async ()=>{
+    if(!company) return;
+    const ok = await gateByOperatorOrMaster(company);
+    if(!ok) return;
+    go({name:"go"},{nodePath:[]});
+  }));
+
+  actions.appendChild(UI.btn("Cais Setup","primary", async ()=>{
+    if(!company) return;
+    const ok = await gateByMaster(company);
+    if(!ok) return;
+    go({name:"setup"},{nodePath:[]});
+  }));
+
+  left.appendChild(actions);
+
+  const right=document.createElement("div");
+  right.className="card";
+  const enabled = !!company?.goSettings?.pedidosEnabled;
+  right.innerHTML = `
+    <h3>Resumo</h3>
+    <div class="muted">Setores → Pastas/Subpastas → Arquivos.</div>
+    <div style="height:10px"></div>
+    <div class="row">
+      <span class="badge">Go: operador</span>
+      <span class="badge">Setup: edição</span>
+      <span class="badge">${enabled ? "Pedidos: ativo" : "Pedidos: desativado"}</span>
+      <span class="badge">Export/Import .js</span>
+    </div>
+  `;
+
+  wrap.appendChild(left);
+  wrap.appendChild(right);
+  return wrap;
+}
+
+/* GO vertical + alça (livre) */
+function viewGo(){
+  const company = getCompany(store.ctx.companyId, store.ctx.imported);
+  if(!company){ UI.setTitle("Cais Go"); return document.createElement("div"); }
+  ensureCompanyDefaults(company);
+
+  UI.setTitle("Cais Go");
+
+  UI.setHeaderActions([
+    UI.btn("Home","", ()=>{ store.ctx.nodePath=[]; render(); }),
+    UI.btn("Voltar","", ()=>{ if(store.ctx.nodePath.length){ store.ctx.nodePath.pop(); render(); } }),
+    UI.btn("Sair / Trocar empresa","danger", async ()=>{
+      if(company.pinHash){
+        const ok = await gateByMaster(company);
+        if(!ok) return;
+      }
+      go({name:"companyDash"},{nodePath:[]});
+    })
+  ]);
+
+  const enabled = !!company.goSettings.pedidosEnabled;
+
+  if(!enabled){
+    const container=document.createElement("div");
+    container.className="grid";
+    container.appendChild(buildGoLeftSystem(company));
+    return container;
+  }
+
+  const goWrap=document.createElement("div");
+  goWrap.className="goVWrap";
+
+  const topPane=document.createElement("div");
+  topPane.className="goTopPane";
+  topPane.appendChild(buildGoLeftSystem(company));
+
+  const pedPanel=buildPedidosPanel(company);
+
+  goWrap.appendChild(topPane);
+  goWrap.appendChild(pedPanel);
+
+  const handle = pedPanel.querySelector("[data-handle='1']");
+  attachPedidosResizer(company, goWrap, pedPanel, handle);
+
+  return goWrap;
+}
+
+function buildGoLeftSystem(company){
+  const node = currentNode(company);
+
+  const top=document.createElement("div");
+  top.className="grid";
+  top.style.gap="12px";
+
+  const crumbs = nodePathToCrumbs(company);
+  const crumbsBar=document.createElement("div");
+  crumbsBar.className="crumbs";
+  crumbs.forEach((c, idx)=>{
+    const b=document.createElement("button");
+    b.className="crumb";
+    b.textContent=c.name;
+    if(idx===crumbs.length-1) b.disabled=true;
+    else b.onclick=()=>{
+      const ids = crumbs.slice(1, idx+1).map(x=>x.id);
+      store.ctx.nodePath = ids;
+      render();
+    };
+    crumbsBar.appendChild(b);
+  });
+
+  const searchWrap=document.createElement("div");
+  searchWrap.className="searchBox";
+  const sInp=UI.input("text","goSearch","Pesquisar (ex: briiigadero)");
+  sInp.autocomplete="off";
+  searchWrap.appendChild(sInp);
+
+  const results=document.createElement("div");
+  results.className="results";
+  searchWrap.appendChild(results);
+
+  const idx = indexTree(company);
+  function showResults(q){
+    results.innerHTML="";
+    const query=q.trim();
+    if(!query){ results.style.display="none"; return; }
+    const scored = idx.map(it=>({ ...it, sc: scoreMatch(query, it.name) }))
+      .filter(x=>x.sc>0.25)
+      .sort((a,b)=>b.sc-a.sc)
+      .slice(0,12);
+
+    results.style.display="block";
+    if(!scored.length){
+      const r=document.createElement("div");
+      r.className="resRow";
+      r.innerHTML = `<div class="resTitle">Nada encontrado</div><div class="resPath">Tente outra escrita</div>`;
+      results.appendChild(r);
+      return;
+    }
+    scored.forEach(it=>{
+      const r=document.createElement("div");
+      r.className="resRow";
+      r.innerHTML = `<div class="resTitle">${it.kind==="file" ? "📎 " : "📁 "}${escapeHTML(it.name)}</div>
+                     <div class="resPath">${it.pathNames.map(escapeHTML).join(" > ")}</div>`;
+      r.onclick=()=>{
+        store.ctx.nodePath = it.pathIds.slice(1);
+        results.style.display="none";
+        sInp.value="";
+        render();
+        if(it.kind==="file"){
+          const n = findNode(company.root, it.nodeId);
+          const f = (n?.files||[]).find(x=>x.id===it.fileId);
+          if(f) openFileViewer(f);
+        }
+      };
+      results.appendChild(r);
+    });
+  }
+  sInp.oninput = (e)=>showResults(e.target.value);
+
+  document.addEventListener("click", (e)=>{
+    if(!searchWrap.contains(e.target)) results.style.display="none";
+  }, { capture:true });
+
+  const headRow=document.createElement("div");
+  headRow.className="row";
+  headRow.appendChild(crumbsBar);
+  headRow.appendChild(document.createElement("div")).className="spacer";
+  headRow.appendChild(searchWrap);
+
+  const content=document.createElement("div");
+  content.className="card";
+
+  const nameRow=document.createElement("div");
+  nameRow.className="row";
+  nameRow.appendChild(iconNode(node));
+  const tx=document.createElement("div");
+  tx.innerHTML = `<div style="font-weight:900; font-size:18px">${escapeHTML(node.name)}</div>
+                  <div class="muted" style="font-size:12px">Visualização (sem edição)</div>`;
+  nameRow.appendChild(tx);
+  content.appendChild(nameRow);
+
+  content.appendChild(document.createElement("div")).style.height="12px";
+
+  const children=(node.children||[]);
+  const files=(node.files||[]);
+
+  const sub=document.createElement("div"); sub.className="grid";
+
+  const fwrap=document.createElement("div");
+  fwrap.innerHTML = `<div class="label">Pastas</div>`;
+  const flist=document.createElement("div"); flist.className="list";
+  children.forEach(ch=>{
+    const it=document.createElement("div"); it.className="item";
+    it.appendChild(iconNode(ch));
+    const mid=document.createElement("div"); mid.className="spacer";
+    mid.innerHTML = `<div style="font-weight:800">${escapeHTML(ch.name)}</div>
+      <div class="muted" style="font-size:12px">${(ch.children||[]).length} pastas · ${(ch.files||[]).length} arquivos</div>`;
+    it.appendChild(mid);
+    it.appendChild(UI.btn("Abrir","openBtn primary", ()=>{
+      store.ctx.nodePath.push(ch.id);
+      render();
+    }));
+    flist.appendChild(it);
+  });
+  if(!children.length){
+    const e=document.createElement("div"); e.className="muted"; e.style.padding="8px 2px"; e.textContent="Nenhuma pasta aqui.";
+    flist.appendChild(e);
+  }
+  fwrap.appendChild(flist);
+
+  const awrap=document.createElement("div");
+  awrap.innerHTML = `<div class="label">Arquivos</div>`;
+  const alist=document.createElement("div"); alist.className="list";
+  files.forEach(file=>{
+    const it=document.createElement("div"); it.className="item";
+    const ic=document.createElement("div"); ic.className="icon";
+    ic.style.background="rgba(100,116,139,.10)";
+    ic.innerHTML = `<span class="mono" style="font-weight:900;color:var(--accent2);font-size:18px">${fmtType(file.mime).slice(0,1)}</span>`;
+    it.appendChild(ic);
+    const mid=document.createElement("div"); mid.className="spacer";
+    mid.innerHTML = `<div style="font-weight:800">${escapeHTML(file.name)}</div><div class="muted" style="font-size:12px">${fmtType(file.mime)}</div>`;
+    it.appendChild(mid);
+    it.appendChild(UI.btn("Abrir","openBtn primary", ()=>openFileViewer(file)));
+    alist.appendChild(it);
+  });
+  if(!files.length){
+    const e=document.createElement("div"); e.className="muted"; e.style.padding="8px 2px"; e.textContent="Nenhum arquivo aqui.";
+    alist.appendChild(e);
+  }
+  awrap.appendChild(alist);
+
+  sub.appendChild(fwrap);
+  sub.appendChild(awrap);
+
+  content.appendChild(sub);
+
+  top.appendChild(headRow);
+  top.appendChild(content);
+  return top;
+}
+
+function buildPedidosPanel(company){
+  const { key, bucket } = ordersToday(company);
+
+  const wrap=document.createElement("div");
+  wrap.className="card pedWrap";
+  wrap.dataset.collapsed = "0";
+
+  const handle=document.createElement("div");
+  handle.className="pedHandle";
+  handle.setAttribute("data-handle","1");
+  handle.innerHTML = `<div class="bar"></div>`;
+
+  const collapsedInfo=document.createElement("div");
+  collapsedInfo.className="pedCollapsedInfo";
+  collapsedInfo.innerHTML = `Pedidos hoje (<span class="mono">${key}</span>): ${bucket.open.length} a fazer · ${bucket.done.length} concluídos`;
+
+  const inner=document.createElement("div");
+  inner.className="pedInner";
+
+  const head=document.createElement("div");
+  head.className="panelHead";
+  head.innerHTML = `
+    <div>
+      <div class="panelTitle">Cais Pedidos</div>
+      <div class="panelSub">Hoje: <span class="mono">${key}</span> · Arraste a alça (20–80%)</div>
+    </div>
+  `;
+  const spacer=document.createElement("div"); spacer.className="spacer";
+  head.appendChild(spacer);
+
+  const btnAdd=document.createElement("button");
+  btnAdd.className="btn primary";
+  btnAdd.textContent="Adicionar";
+  btnAdd.onclick=()=>openAddPedido(company);
+  head.appendChild(btnAdd);
+
+  const body=document.createElement("div");
+  body.className="panelBody";
+
+  const openBox=document.createElement("div");
+  openBox.className="panelBox";
+  openBox.innerHTML = `<div class="miniRow" style="margin-bottom:6px">
+      <div style="font-weight:900">A Fazer</div>
+      <span class="pill">${(bucket.open||[]).length} itens</span>
+      <span class="hint">Prioridade: ↑/↓</span>
+    </div>`;
+
+  (bucket.open||[]).forEach((o, idx)=>{
+    const card=document.createElement("div");
+    card.className="orderCard";
+
+    const line=document.createElement("div");
+    line.className="orderLine";
+
+    const info=document.createElement("div");
+    info.className="orderInfo";
+    info.innerHTML = `
+      <span class="qtyLabel">Qtd:</span>
+      <span class="qtyValue">${o.qty}x</span>
+      <span class="orderTitleInline" title="${escapeHTML(o.title)}">${escapeHTML(o.title)}</span>
+      <span class="pill">${o.minutes} min</span>
+      <span class="orderPathInline" title="${escapeHTML(o.path)}">${escapeHTML(o.path)}</span>
+    `;
+
+    const actions=document.createElement("div");
+    actions.className="orderActions";
+
+    const up = iconAction("▲","Subir", ()=>{
+      if(idx===0) return;
+      moveOrder(company, o.id, -1); save();
+    }, { disabled: idx===0 });
+
+    const down = iconAction("▼","Descer", ()=>{
+      if(idx===(bucket.open.length-1)) return;
+      moveOrder(company, o.id, +1); save();
+    }, { disabled: idx===(bucket.open.length-1) });
+
+    const edit = iconAction("✎","Editar", ()=>openEditPedido(company, o, false));
+    const done = iconAction("✓","Concluir", ()=>{ completeOrder(company, o.id); save(); }, { kind:"p" });
+    const del  = iconAction("🗑","Excluir", ()=>{ if(confirm("Excluir pedido?")){ deleteOrder(company, o.id); save(); } }, { kind:"d" });
+
+    actions.appendChild(up);
+    actions.appendChild(down);
+    actions.appendChild(edit);
+    actions.appendChild(done);
+    actions.appendChild(del);
+
+    line.appendChild(info);
+    line.appendChild(actions);
+
+    card.appendChild(line);
+
+    if(o.note){
+      const note=document.createElement("div");
+      note.className="orderNote";
+      note.textContent = o.note;
+      card.appendChild(note);
+    }
+
+    openBox.appendChild(card);
+  });
+
+  if(!(bucket.open||[]).length){
+    const empty=document.createElement("div");
+    empty.className="muted";
+    empty.style.padding="6px 2px";
+    empty.textContent="Sem pedidos em aberto.";
+    openBox.appendChild(empty);
+  }
+
+  const doneBox=document.createElement("div");
+  doneBox.className="panelBox";
+  doneBox.innerHTML = `<div class="miniRow" style="margin-bottom:6px">
+      <div style="font-weight:900">Concluídos</div>
+      <span class="pill">${(bucket.done||[]).length} itens</span>
+      <span class="hint">Pode retornar</span>
+    </div>`;
+
+  (Array.isArray(bucket.done)?bucket.done:[]).forEach(o=>{
+    const card=document.createElement("div");
+    card.className="orderCard";
+
+    const line=document.createElement("div");
+    line.className="orderLine";
+
+    const info=document.createElement("div");
+    info.className="orderInfo";
+    info.innerHTML = `
+      <span class="qtyLabel">Qtd:</span>
+      <span class="qtyValue">${o.qty}x</span>
+      <span class="orderTitleInline" title="${escapeHTML(o.title)}">${escapeHTML(o.title)}</span>
+      <span class="pill">${o.minutes} min</span>
+      <span class="orderPathInline" title="${escapeHTML(o.path)}">${escapeHTML(o.path)}</span>
+      <span class="pill">OK</span>
+    `;
+
+    const actions=document.createElement("div");
+    actions.className="orderActions";
+
+    const undo = iconAction("↩","Retornar", ()=>{ uncompleteOrder(company, o.id); save(); });
+    const edit = iconAction("✎","Editar", ()=>openEditPedido(company, o, true));
+    const del  = iconAction("🗑","Excluir", ()=>{ if(confirm("Excluir pedido?")){ deleteOrder(company, o.id); save(); } }, { kind:"d" });
+
+    actions.appendChild(undo);
+    actions.appendChild(edit);
+    actions.appendChild(del);
+
+    line.appendChild(info);
+    line.appendChild(actions);
+
+    card.appendChild(line);
+
+    if(o.note){
+      const note=document.createElement("div");
+      note.className="orderNote";
+      note.textContent = o.note;
+      card.appendChild(note);
+    }
+
+    doneBox.appendChild(card);
+  });
+
+  if(!(bucket.done||[]).length){
+    const empty=document.createElement("div");
+    empty.className="muted";
+    empty.style.padding="6px 2px";
+    empty.textContent="Nada concluído ainda.";
+    doneBox.appendChild(empty);
+  }
+
+  body.appendChild(openBox);
+  body.appendChild(doneBox);
+
+  inner.appendChild(head);
+  inner.appendChild(body);
+
+  wrap.appendChild(handle);
+  wrap.appendChild(collapsedInfo);
+  wrap.appendChild(inner);
+
+  return wrap;
+}
+
+function iconAction(char, label, onClick, opts={}){
+  const b=document.createElement("button");
+  b.className = "iconBtn" + (opts.kind ? " " + opts.kind : "");
+  b.type="button";
+  b.textContent = char;
+  b.title = label;
+  b.setAttribute("aria-label", label);
+  if(opts.disabled) b.disabled = true;
+  b.onclick = onClick;
+  return b;
+}
+
+/* SETUP (com subir/descer) */
+function viewSetup(){
+  const company = getCompany(store.ctx.companyId, store.ctx.imported);
+  if(!company){ UI.setTitle("Cais Setup"); return document.createElement("div"); }
+  ensureCompanyDefaults(company);
+
+  UI.setTitle("Cais Setup");
+
+  UI.setHeaderActions([
+    UI.btn("Voltar","", ()=>go({name:"companyDash"},{nodePath:[]})),
+    UI.btn("Home (Setores)","", ()=>{ store.ctx.nodePath=[]; render(); }),
+    UI.btn("Segurança","", ()=>openSecurity(company)),
+    UI.btn("Config Go","", ()=>openGoConfig(company)),
+    UI.btn("Novo item","primary", ()=>openCreateFolder(company)),
+    UI.btn("Anexar arquivo","", ()=>openAddFile(company)),
+    UI.btn("Câmera","", ()=>openCapture(company)),
+  ]);
+
+  const node = currentNode(company);
+  const wrap=document.createElement("div");
+  wrap.className="grid";
+  wrap.style.gap="12px";
+
+  const crumbs = nodePathToCrumbs(company);
+  const crumbsBar=document.createElement("div");
+  crumbsBar.className="crumbs";
+  crumbs.forEach((c, idx)=>{
+    const b=document.createElement("button");
+    b.className="crumb";
+    b.textContent=c.name;
+    if(idx===crumbs.length-1) b.disabled=true;
+    else b.onclick=()=>{
+      const ids = crumbs.slice(1, idx+1).map(x=>x.id);
+      store.ctx.nodePath = ids;
+      render();
+    };
+    crumbsBar.appendChild(b);
+  });
+
+  const head=document.createElement("div");
+  head.className="card";
+  const row=document.createElement("div"); row.className="row";
+  row.appendChild(iconNode(node));
+  const tx=document.createElement("div");
+  tx.innerHTML = `<div style="font-weight:900; font-size:18px">${escapeHTML(node.name)}</div>
+                  <div class="muted" style="font-size:12px">Editar: nome · imagem · cor · anexos</div>`;
+  row.appendChild(tx);
+  row.appendChild(document.createElement("div")).className="spacer";
+  row.appendChild(UI.btn("Editar esta pasta","", ()=>openEditFolder(company, node)));
+  head.appendChild(row);
+  head.appendChild(document.createElement("div")).style.height="10px";
+  head.appendChild(crumbsBar);
+
+  const body=document.createElement("div");
+  body.className="card";
+
+  const children=node.children||[];
+  const files=node.files||[];
+
+  const cols=document.createElement("div");
+  cols.className="split";
+
+  const left=document.createElement("div");
+  left.innerHTML = `<h3>Pastas</h3><div class="muted">Crie e organize subpastas.</div>`;
+  const flist=document.createElement("div"); flist.className="list"; flist.style.marginTop="10px";
+
+  children.forEach((ch, idx)=>{
+    const it=document.createElement("div"); it.className="item";
+    it.appendChild(iconNode(ch));
+
+    const mid=document.createElement("div"); mid.className="spacer";
+    mid.innerHTML = `<div style="font-weight:800">${escapeHTML(ch.name)}</div>
+      <div class="muted" style="font-size:12px">${(ch.children||[]).length} pastas · ${(ch.files||[]).length} arquivos</div>`;
+
+    const controls=document.createElement("div"); controls.className="row";
+    controls.appendChild(UI.btn("Abrir","openBtn primary", ()=>{ store.ctx.nodePath.push(ch.id); render(); }));
+    controls.appendChild(UI.btn("Editar","small", ()=>openEditFolder(company, ch)));
+
+    controls.appendChild(UI.btn("↑","small", ()=>{
+      if(idx===0) return;
+      moveItem(node.children, idx, idx-1);
+      save();
+    }));
+    controls.appendChild(UI.btn("↓","small", ()=>{
+      if(idx===node.children.length-1) return;
+      moveItem(node.children, idx, idx+1);
+      save();
+    }));
+
+    controls.appendChild(UI.btn("Excluir","small danger", ()=>deleteFolder(node, ch)));
+
+    it.appendChild(mid);
+    it.appendChild(controls);
+    flist.appendChild(it);
+  });
+
+  if(!children.length){
+    const e=document.createElement("div"); e.className="muted"; e.style.padding="8px 2px"; e.textContent="Nenhuma pasta aqui.";
+    flist.appendChild(e);
+  }
+  left.appendChild(flist);
+
+  const right=document.createElement("div");
+  right.innerHTML = `<h3>Arquivos</h3><div class="muted">Uploads e capturas.</div>`;
+  const alist=document.createElement("div"); alist.className="list"; alist.style.marginTop="10px";
+  files.forEach(f=>{
+    const it=document.createElement("div"); it.className="item";
+    const ic=document.createElement("div"); ic.className="icon";
+    ic.style.background="rgba(100,116,139,.10)";
+    ic.innerHTML = `<span class="mono" style="font-weight:900;color:var(--accent2);font-size:18px">${fmtType(f.mime).slice(0,1)}</span>`;
+    it.appendChild(ic);
+    const mid=document.createElement("div"); mid.className="spacer";
+    mid.innerHTML = `<div style="font-weight:800">${escapeHTML(f.name)}</div><div class="muted" style="font-size:12px">${fmtType(f.mime)}</div>`;
+    const controls=document.createElement("div"); controls.className="row";
+    controls.appendChild(UI.btn("Abrir","openBtn primary", ()=>openFileViewer(f)));
+    controls.appendChild(UI.btn("Excluir","small danger", ()=>deleteFile(node, f)));
+    it.appendChild(mid);
+    it.appendChild(controls);
+    alist.appendChild(it);
+  });
+  if(!files.length){
+    const e=document.createElement("div"); e.className="muted"; e.style.padding="8px 2px"; e.textContent="Nenhum arquivo aqui.";
+    alist.appendChild(e);
+  }
+  right.appendChild(alist);
+
+  cols.appendChild(left);
+  cols.appendChild(right);
+  body.appendChild(cols);
+
+  wrap.appendChild(head);
+  wrap.appendChild(body);
+  return wrap;
+}
+
+/* ========= MODAIS (restante igual) ========= */
+
+function openGoConfig(company){
+  const wrap=document.createElement("div");
+  const enabled = !!company.goSettings?.pedidosEnabled;
+  wrap.innerHTML = `
+    <div style="font-weight:900">Configuração do Cais Go</div>
+    <div class="muted" style="margin-top:4px">Ativa/desativa o painel “Cais Pedidos”.</div>
+    <div class="hr"></div>
+
+    <div class="row" style="gap:10px; align-items:center">
+      <input type="checkbox" id="ped" ${enabled ? "checked" : ""} />
+      <div>
+        <div style="font-weight:900">Cais Pedidos</div>
+        <div class="muted" style="font-size:12px">Altura livre 20–80%. Para ocultar: puxe abaixo de 20%.</div>
+      </div>
+    </div>
+  `;
+  const cancel=UI.btn("Cancelar","", ()=>UI.modal(false));
+  const saveBtn=UI.btn("Salvar","primary", ()=>{
+    company.goSettings = company.goSettings || {};
+    company.goSettings.pedidosEnabled = !!wrap.querySelector("#ped").checked;
+    save();
+    UI.modal(false);
+  });
+  UI.modal(true,{title:"Config Go", body:wrap, foot:[cancel, saveBtn]});
+}
+
+function openEditImportFolder(folder){
+  const wrap=document.createElement("div");
+  wrap.innerHTML = `
+    <div class="label">Nome da pasta</div>
+    <input class="input" id="fName" placeholder="Ex: Importados" />
+    <div class="label">Trocar imagem/ícone (opcional)</div>
+    <input class="input" id="fIcon" type="file" accept="image/*" />
+    <div class="label">Cor (opcional)</div>
+    <input class="input" id="fColor" type="color" />
+    <div class="hint" style="margin-top:8px">Se remover a imagem, o ícone vira letra.</div>
+  `;
+  wrap.querySelector("#fName").value = folder.name || "";
+  wrap.querySelector("#fColor").value = folder.color || "#eef2ff";
+
+  const cancel=UI.btn("Cancelar","", ()=>UI.modal(false));
+  const saveBtn=UI.btn("Salvar","primary", async ()=>{
+    const name = wrap.querySelector("#fName").value.trim();
+    if(!name){ UI.toast("Informe o nome."); return; }
+    folder.name = name;
+    folder.color = wrap.querySelector("#fColor").value || folder.color;
+
+    const file = wrap.querySelector("#fIcon").files?.[0];
+    if(file) folder.icon = await fileToDataURL(file);
+
+    save();
+    UI.modal(false);
+  });
+
+  const clearIcon = UI.btn("Remover imagem","danger", ()=>{
+    if(!confirm("Remover imagem do ícone?")) return;
+    folder.icon = "";
+    save();
+    UI.modal(false);
+  });
+
+  UI.modal(true,{title:"Editar Pasta", body:wrap, foot:[cancel, clearIcon, saveBtn]});
+}
+
+/* ======= (Tudo abaixo permanece igual ao seu código anterior) =======
+   Para manter a resposta enxuta, não repliquei novamente:
+   - openAddPedido / openEditPedido
+   - openSecurity / openCreateCompany / openCreateImportFolder / openImportCais
+   - openCreateFolder / openEditFolder / openAddFile / openCapture
+   - openFileViewer / exportCompany / fileToDataURL / escapeHTML
+   - render + boot
+
+   ✅ MAS: como você vai colar um index.html completo, vou incluir essas funções agora. */
+
+
+/* --------- PEDIDOS --------- */
+function openAddPedido(company){
+  const idx = indexTree(company).filter(x=>x.kind==="node" && x.nodeId !== company.root.id);
+  let selected = null;
+
+  const wrap=document.createElement("div");
+  wrap.innerHTML = `
+    <div class="label">Pesquisar receita/pasta</div>
+    <div style="position:relative">
+      <input class="input" id="q" placeholder="Ex: briiigadero" autocomplete="off" />
+      <div class="results" id="res" style="position:absolute; top:44px; display:none"></div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="label">Selecionado</div>
+    <div id="sel" class="muted">Nenhum</div>
+
+    <div class="row" style="margin-top:10px">
+      <div style="flex:1">
+        <div class="label">Quantidade (x)</div>
+        <input class="input" id="qty" type="number" min="1" value="1" />
+      </div>
+      <div style="flex:1">
+        <div class="label">Tempo médio (min)</div>
+        <select class="select" id="mins"></select>
+      </div>
+    </div>
+
+    <div class="label">Descrição / observação</div>
+    <textarea class="textarea" id="note" placeholder="Ex: fazer com 12 latas cada"></textarea>
+  `;
+
+  const minsSel = wrap.querySelector("#mins");
+  for(let m=0; m<=300; m+=ORDER_STEP_MIN){
+    const o=document.createElement("option");
+    o.value=String(m);
+    o.textContent = String(m);
+    minsSel.appendChild(o);
+  }
+  minsSel.value="0";
+
+  const q = wrap.querySelector("#q");
+  const res = wrap.querySelector("#res");
+  const sel = wrap.querySelector("#sel");
+
+  function renderResults(query){
+    res.innerHTML="";
+    const qq = query.trim();
+    if(!qq){ res.style.display="none"; return; }
+    const scored = idx.map(it=>({ ...it, sc: scoreMatch(qq, it.name) }))
+      .filter(x=>x.sc>0.25)
+      .sort((a,b)=>b.sc-a.sc)
+      .slice(0,10);
+
+    res.style.display="block";
+    if(!scored.length){
+      const r=document.createElement("div");
+      r.className="resRow";
+      r.innerHTML = `<div class="resTitle">Nada encontrado</div><div class="resPath">Tente outra escrita</div>`;
+      res.appendChild(r);
+      return;
+    }
+
+    scored.forEach(it=>{
+      const r=document.createElement("div");
+      r.className="resRow";
+      r.innerHTML = `<div class="resTitle">📁 ${escapeHTML(it.name)}</div><div class="resPath">${it.pathNames.map(escapeHTML).join(" > ")}</div>`;
+      r.onclick=()=>{
+        selected = {
+          nodeId: it.nodeId,
+          title: it.name,
+          path: it.pathNames.join(" > ")
+        };
+        sel.innerHTML = `<span style="font-weight:900">${escapeHTML(selected.title)}</span><div class="hint">${escapeHTML(selected.path)}</div>`;
+        res.style.display="none";
+        q.value="";
+      };
+      res.appendChild(r);
+    });
+  }
+
+  q.oninput = (e)=>renderResults(e.target.value);
+
+  document.addEventListener("click", (e)=>{
+    if(!wrap.contains(e.target)) res.style.display="none";
+  }, { capture:true });
+
+  const cancel=UI.btn("Cancelar","", ()=>UI.modal(false));
+  const add=UI.btn("Adicionar","primary", ()=>{
+    if(!selected){ UI.toast("Selecione uma receita/pasta."); return; }
+    const qty = Math.max(1, parseInt(wrap.querySelector("#qty").value || "1", 10));
+    const minutes = Math.max(0, parseInt(wrap.querySelector("#mins").value || "0", 10));
+    const note = (wrap.querySelector("#note").value || "").trim();
+
+    addOrder(company, { ...selected, qty, minutes, note });
+    save();
+    UI.modal(false);
+  });
+
+  UI.modal(true,{title:"Adicionar Pedido", body:wrap, foot:[cancel, add]});
+}
+
+function openEditPedido(company, order, isDone){
+  const wrap=document.createElement("div");
+  wrap.innerHTML = `
+    <div style="font-weight:900">${escapeHTML(order.title)}</div>
+    <div class="muted" style="font-size:12px;margin-top:2px">${escapeHTML(order.path)}</div>
+
+    <div class="row" style="margin-top:12px">
+      <div style="flex:1">
+        <div class="label">Quantidade (x)</div>
+        <input class="input" id="qty" type="number" min="1" />
+      </div>
+      <div style="flex:1">
+        <div class="label">Tempo médio (min)</div>
+        <select class="select" id="mins"></select>
+      </div>
+    </div>
+
+    <div class="label">Descrição / observação</div>
+    <textarea class="textarea" id="note"></textarea>
+  `;
+
+  wrap.querySelector("#qty").value = String(order.qty || 1);
+
+  const minsSel = wrap.querySelector("#mins");
+  for(let m=0; m<=300; m+=ORDER_STEP_MIN){
+    const o=document.createElement("option");
+    o.value=String(m);
+    o.textContent = String(m);
+    minsSel.appendChild(o);
+  }
+  minsSel.value = String(order.minutes || 0);
+
+  wrap.querySelector("#note").value = order.note || "";
+
+  const cancel=UI.btn("Cancelar","", ()=>UI.modal(false));
+  const saveBtn=UI.btn("Salvar","primary", ()=>{
+    order.qty = Math.max(1, parseInt(wrap.querySelector("#qty").value || "1", 10));
+    order.minutes = Math.max(0, parseInt(wrap.querySelector("#mins").value || "0", 10));
+    order.note = (wrap.querySelector("#note").value || "").trim();
+    save();
+    UI.modal(false);
+  });
+
+  const toggleBtn = UI.btn(isDone ? "Retornar p/ A Fazer" : "Concluir","", ()=>{
+    UI.modal(false);
+    if(isDone) uncompleteOrder(company, order.id);
+    else completeOrder(company, order.id);
+    save();
+  });
+
+  const del=UI.btn("Excluir","danger", ()=>{
+    if(!confirm("Excluir pedido?")) return;
+    deleteOrder(company, order.id);
+    save();
+    UI.modal(false);
+  });
+
+  UI.modal(true,{title:"Editar Pedido", body:wrap, foot:[cancel, del, toggleBtn, saveBtn]});
+}
+
+/* --------- SEGURANCA / CRUD / IMPORT-EXPORT / FILES --------- */
+function openSecurity(company){
+  const wrap=document.createElement("div");
+  wrap.innerHTML = `
+    <div style="font-weight:900">Segurança</div>
+    <div class="muted" style="margin-top:4px">PIN Master (Setup/saída do Go) e PIN Operador (entrada no Go).</div>
+
+    <div class="hr"></div>
+
+    <div style="font-weight:800">PIN Master</div>
+    <div class="muted" style="font-size:12px">${company.pinHash ? "Ativo" : "Inativo"}</div>
+    <div class="label">Novo PIN Master (mín. 4 dígitos)</div>
+    <input class="input" id="m1" type="password" inputmode="numeric" placeholder="Digite o novo PIN Master" />
+    <div class="label">Confirmar PIN Master</div>
+    <input class="input" id="m2" type="password" inputmode="numeric" placeholder="Confirmar" />
+    <div class="row" style="margin-top:10px">
+      <button class="btn danger small" id="rmMaster" ${company.pinHash ? "" : "disabled"}>Remover PIN Master</button>
+      <div class="spacer"></div>
+      <span class="hint">Se preencher os campos acima e salvar, ele troca/ativa.</span>
+    </div>
+
+    <div class="hr"></div>
+
+    <div style="font-weight:800">PIN Operador</div>
+    <div class="muted" style="font-size:12px">${company.opPinHash ? "Ativo" : "Inativo"}</div>
+    <div class="label">Novo PIN Operador (mín. 4 dígitos)</div>
+    <input class="input" id="o1" type="password" inputmode="numeric" placeholder="Digite o novo PIN Operador" />
+    <div class="label">Confirmar PIN Operador</div>
+    <input class="input" id="o2" type="password" inputmode="numeric" placeholder="Confirmar" />
+    <div class="row" style="margin-top:10px">
+      <button class="btn danger small" id="rmOper" ${company.opPinHash ? "" : "disabled"}>Remover PIN Operador</button>
+      <div class="spacer"></div>
+      <span class="hint">Se ativo, o Go pede PIN para entrar.</span>
+    </div>
+  `;
+
+  wrap.querySelector("#rmMaster").onclick = ()=>{
+    if(!confirm("Remover PIN Master?")) return;
+    company.pinHash = "";
+    save();
+    UI.modal(false);
+    UI.toast("PIN Master removido.");
+  };
+  wrap.querySelector("#rmOper").onclick = ()=>{
+    if(!confirm("Remover PIN Operador?")) return;
+    company.opPinHash = "";
+    save();
+    UI.modal(false);
+    UI.toast("PIN Operador removido.");
+  };
+
+  const cancel = UI.btn("Cancelar","", ()=>UI.modal(false));
+  const saveBtn = UI.btn("Salvar","primary", async ()=>{
+    const m1 = wrap.querySelector("#m1").value.trim();
+    const m2 = wrap.querySelector("#m2").value.trim();
+    const o1 = wrap.querySelector("#o1").value.trim();
+    const o2 = wrap.querySelector("#o2").value.trim();
+
+    if(m1 || m2){
+      if(!m1 || m1.length < 4){ UI.toast("PIN Master mínimo: 4 dígitos."); return; }
+      if(m1 !== m2){ UI.toast("PIN Master não confere."); return; }
+      company.pinHash = await sha256(m1);
+    }
+    if(o1 || o2){
+      if(!o1 || o1.length < 4){ UI.toast("PIN Operador mínimo: 4 dígitos."); return; }
+      if(o1 !== o2){ UI.toast("PIN Operador não confere."); return; }
+      company.opPinHash = await sha256(o1);
+    }
+
+    save();
+    UI.modal(false);
+    UI.toast("Segurança atualizada.");
+  });
+
+  UI.modal(true,{title:"Segurança", body:wrap, foot:[cancel, saveBtn]});
+}
+
+function openCreateCompany(){
+  const wrap=document.createElement("div");
+  wrap.innerHTML = `
+    <div class="label">Nome da empresa/projeto</div>
+    <input class="input" id="cName" placeholder="Ex: Duas Cerejas" />
+
+    <div class="label">Ícone (opcional)</div>
+    <input class="input" id="cIcon" type="file" accept="image/*" />
+
+    <div class="label">PIN Master (opcional)</div>
+    <div class="row" style="gap:8px">
+      <input type="checkbox" id="usePin" />
+      <div class="muted" style="font-size:13px">Ativar PIN Master agora</div>
+    </div>
+
+    <div id="pinFields" style="display:none; margin-top:10px">
+      <div class="label">Definir PIN</div>
+      <input class="input" id="pin1" type="password" inputmode="numeric" placeholder="PIN" />
+      <div class="label">Confirmar PIN</div>
+      <input class="input" id="pin2" type="password" inputmode="numeric" placeholder="Confirmar" />
+      <div class="hint" style="margin-top:8px">PIN Operador pode ser configurado depois em Setup → Segurança.</div>
+    </div>
+  `;
+
+  const usePin = wrap.querySelector("#usePin");
+  const pinFields = wrap.querySelector("#pinFields");
+  usePin.onchange = ()=> pinFields.style.display = usePin.checked ? "block" : "none";
+
+  const cancel = UI.btn("Cancelar","", ()=>UI.modal(false));
+  const create = UI.btn("Criar","primary", async ()=>{
+    const name = wrap.querySelector("#cName").value.trim();
+    if(!name){ UI.toast("Informe o nome."); return; }
+
+    let icon = "";
+    const file = wrap.querySelector("#cIcon").files?.[0];
+    if(file) icon = await fileToDataURL(file);
+
+    let pinHash = "";
+    if(usePin.checked){
+      const p1 = wrap.querySelector("#pin1").value.trim();
+      const p2 = wrap.querySelector("#pin2").value.trim();
+      if(!p1 || p1.length < 4){ UI.toast("PIN mínimo: 4 dígitos."); return; }
+      if(p1 !== p2){ UI.toast("PIN não confere."); return; }
+      pinHash = await sha256(p1);
+    }
+
+    const company = {
+      id: ID(),
+      name,
+      icon,
+      color: "#eaf0ff",
+      pinHash,
+      opPinHash: "",
+      createdAt: nowISO(),
+      root: makeRootSetores(),
+      goSettings: { pedidosEnabled: true, pedidosPanelPct: PED_MIN, pedidosPanelPctLast: PED_MIN },
+      ordersByDate: {}
+    };
+
+    store.data.companies.push(company);
+    save();
+    UI.modal(false);
+    go({name:"companyDash"},{companyId:company.id, imported:false, nodePath:[]});
+  });
+
+  UI.modal(true,{title:"Criar Empresa/Projeto", body:wrap, foot:[cancel, create]});
+  setTimeout(()=>wrap.querySelector("#cName")?.focus(), 50);
+}
+
+function openCreateImportFolder(){
+  const wrap=document.createElement("div");
+  wrap.innerHTML = `
+    <div class="label">Nome da pasta</div>
+    <input class="input" id="fName" placeholder="Ex: Filiais / Parceiros / Treinamentos" />
+    <div class="label">Ícone (opcional)</div>
+    <input class="input" id="fIcon" type="file" accept="image/*" />
+    <div class="label">Cor (opcional)</div>
+    <input class="input" id="fColor" type="color" value="#eef2ff" />
+  `;
+  const cancel=UI.btn("Cancelar","", ()=>UI.modal(false));
+  const create=UI.btn("Criar","primary", async ()=>{
+    const name=wrap.querySelector("#fName").value.trim();
+    if(!name){ UI.toast("Informe o nome."); return; }
+    let icon="";
+    const file=wrap.querySelector("#fIcon").files?.[0];
+    if(file) icon=await fileToDataURL(file);
+
+    const color = wrap.querySelector("#fColor").value || "#eef2ff";
+    store.data.imports.folders.push({ id:ID(), name, icon, color, caisIds:[] });
+    save();
+    UI.modal(false);
+  });
+  UI.modal(true,{title:"Criar Pasta", body:wrap, foot:[cancel, create]});
+}
+
+function openImportCais(forceFolderId=null){
+  const wrap=document.createElement("div");
+
+  if(!(store.data.imports.folders||[]).length){
+    const id=ID();
+    store.data.imports.folders.push({ id, name:"Importados", icon:"", color:"#eef2ff", caisIds:[] });
+    DB.save(store.data);
+  }
+
+  const folderId = forceFolderId || store.data.imports.folders[0].id;
+
+  wrap.innerHTML = `
+    <div class="label">Escolha a pasta</div>
+    <select class="select" id="folderSel"></select>
+
+    <div class="label">Arquivo do Cais (.js)</div>
+    <input class="input" id="caisFile" type="file" accept=".js,text/javascript,application/javascript" />
+    <div class="hint" style="margin-top:8px">Selecione o arquivo gerado em “Exportar Cais”.</div>
+  `;
+
+  const sel=wrap.querySelector("#folderSel");
+  (store.data.imports.folders||[]).forEach(f=>{
+    const o=document.createElement("option");
+    o.value=f.id;
+    o.textContent=f.name;
+    sel.appendChild(o);
+  });
+  sel.value = folderId;
+
+  const cancel=UI.btn("Cancelar","", ()=>UI.modal(false));
+  const imp=UI.btn("Importar","primary", async ()=>{
+    const f = wrap.querySelector("#caisFile").files?.[0];
+    if(!f){ UI.toast("Selecione o arquivo."); return; }
+
+    try{
+      const txt = await f.text();
+      const payload = parseExportJS(txt);
+
+      if(!payload || payload.version !== 1 || !payload.company){
+        UI.toast("Arquivo inválido (não é um export do Cais).");
+        return;
+      }
+
+      const folder = store.data.imports.folders.find(x=>x.id===sel.value);
+      if(!folder){ UI.toast("Pasta inválida."); return; }
+
+      const fp = await companyFingerprint(payload.company);
+      const exists = (folder.caisIds||[])
+        .map(id=>store.data.imports.cais.find(c=>c.id===id))
+        .filter(Boolean)
+        .some(c=>c.fingerprint === fp);
+
+      if(exists){
+        UI.toast("Esse Cais já foi importado nessa pasta.");
+        UI.modal(false);
+        go({name:"importFolder"},{importFolderId:folder.id});
+        return;
+      }
+
+      const c = payload.company;
+      const newId = ID();
+      const imported = { ...c, id:newId, importedAt: nowISO(), fingerprint: fp };
+
+      ensureCompanyDefaults(imported);
+
+      store.data.imports.cais.push(imported);
+      folder.caisIds = folder.caisIds || [];
+      folder.caisIds.push(newId);
+
+      DB.save(store.data);
+
+      UI.modal(false);
+      UI.toast("Importado com sucesso.");
+      go({name:"importFolder"},{importFolderId:folder.id});
+    }catch(e){
+      UI.toast("Falha ao importar: arquivo .js não reconhecido pelo Cais.");
+    }
+  });
+
+  UI.modal(true,{title:"Importar Cais", body:wrap, foot:[cancel, imp]});
+}
+
+function openCreateFolder(company){
+  const wrap=document.createElement("div");
+  wrap.innerHTML = `
+    <div class="label">Nome</div>
+    <input class="input" id="nName" placeholder="Ex: Cozinha 1 / Receitas / Brigadeiro" />
+    <div class="label">Imagem/ícone (opcional)</div>
+    <input class="input" id="nIcon" type="file" accept="image/*" />
+    <div class="label">Cor (opcional)</div>
+    <input class="input" id="nColor" type="color" value="#eaf0ff" />
+  `;
+  const cancel=UI.btn("Cancelar","", ()=>UI.modal(false));
+  const create=UI.btn("Criar","primary", async ()=>{
+    const name=wrap.querySelector("#nName").value.trim();
+    if(!name){ UI.toast("Informe o nome."); return; }
+    const color=wrap.querySelector("#nColor").value || "#eaf0ff";
+    let icon="";
+    const file=wrap.querySelector("#nIcon").files?.[0];
+    if(file) icon = await fileToDataURL(file);
+
+    const parent = currentNode(company);
+    parent.children = parent.children || [];
+    parent.children.push({ id:ID(), name, icon, color, children:[], files:[] });
+    save();
+    UI.modal(false);
+  });
+  UI.modal(true,{title:"Novo item", body:wrap, foot:[cancel, create]});
+}
+
+function openEditFolder(company, node){
+  const wrap=document.createElement("div");
+  wrap.innerHTML = `
+    <div class="label">Nome</div>
+    <input class="input" id="eName" />
+    <div class="label">Trocar imagem/ícone (opcional)</div>
+    <input class="input" id="eIcon" type="file" accept="image/*" />
+    <div class="label">Cor</div>
+    <input class="input" id="eColor" type="color" />
+  `;
+  wrap.querySelector("#eName").value = node.name || "";
+  wrap.querySelector("#eColor").value = node.color || "#eaf0ff";
+
+  const cancel=UI.btn("Cancelar","", ()=>UI.modal(false));
+  const saveBtn=UI.btn("Salvar","primary", async ()=>{
+    const name=wrap.querySelector("#eName").value.trim();
+    if(!name){ UI.toast("Informe o nome."); return; }
+    node.name = name;
+    node.color = wrap.querySelector("#eColor").value || node.color;
+
+    const file=wrap.querySelector("#eIcon").files?.[0];
+    if(file) node.icon = await fileToDataURL(file);
+
+    save();
+    UI.modal(false);
+  });
+  UI.modal(true,{title:"Editar pasta", body:wrap, foot:[cancel, saveBtn]});
+}
+
+function deleteFolder(parent, child){
+  if(!confirm(`Excluir "${child.name}"?`)) return;
+  parent.children = (parent.children||[]).filter(x=>x.id!==child.id);
+  save();
+}
+
+function openAddFile(company){
+  const wrap=document.createElement("div");
+  wrap.innerHTML = `
+    <div class="label">Selecionar arquivo</div>
+    <input class="input" id="fileUp" type="file" />
+    <div class="hint" style="margin-top:8px">O arquivo fica dentro do banco do Cais (exportável/importável).</div>
+  `;
+  const cancel=UI.btn("Cancelar","", ()=>UI.modal(false));
+  const add=UI.btn("Anexar","primary", async ()=>{
+    const f = wrap.querySelector("#fileUp").files?.[0];
+    if(!f){ UI.toast("Selecione um arquivo."); return; }
+    const data = await fileToDataURL(f);
+    const node = currentNode(company);
+    node.files = node.files || [];
+    node.files.push({ id:ID(), name:f.name, mime:f.type || "application/octet-stream", data, createdAt: nowISO() });
+    save();
+    UI.modal(false);
+  });
+  UI.modal(true,{title:"Anexar arquivo", body:wrap, foot:[cancel, add]});
+}
+
+function openCapture(company){
+  const wrap=document.createElement("div");
+  wrap.innerHTML = `
+    <div class="label">Capturar (foto/vídeo)</div>
+    <input class="input" id="cap" type="file" accept="image/*,video/*" capture="environment" />
+    <div class="hint" style="margin-top:8px">No celular, abre a câmera.</div>
+  `;
+  const cancel=UI.btn("Cancelar","", ()=>UI.modal(false));
+  const add=UI.btn("Salvar","primary", async ()=>{
+    const f = wrap.querySelector("#cap").files?.[0];
+    if(!f){ UI.toast("Capture algo."); return; }
+    const data = await fileToDataURL(f);
+    const node = currentNode(company);
+    node.files = node.files || [];
+    node.files.push({ id:ID(), name:f.name || ("captura_"+Date.now()), mime:f.type || "application/octet-stream", data, createdAt: nowISO() });
+    save();
+    UI.modal(false);
+  });
+  UI.modal(true,{title:"Câmera", body:wrap, foot:[cancel, add]});
+}
+
+function deleteFile(node, file){
+  if(!confirm(`Excluir "${file.name}"?`)) return;
+  node.files = (node.files||[]).filter(x=>x.id!==file.id);
+  save();
+}
+
+function openFileViewer(file){
+  const wrap=document.createElement("div");
+  wrap.innerHTML = `<div style="font-weight:900;font-size:16px">${escapeHTML(file.name)}</div>
+                    <div class="muted" style="font-size:12px;margin-top:2px">${fmtType(file.mime)}</div>
+                    <div style="height:12px"></div>`;
+  const box=document.createElement("div");
+  box.className="card";
+  box.style.boxShadow="none";
+  box.style.borderRadius="14px";
+
+  if(file.mime?.startsWith("image/")){
+    const img=document.createElement("img");
+    img.src=file.data;
+    img.style.width="100%";
+    img.style.borderRadius="12px";
+    box.appendChild(img);
+  }else if(file.mime?.startsWith("video/")){
+    const v=document.createElement("video");
+    v.src=file.data;
+    v.controls=true;
+    v.style.width="100%";
+    v.style.borderRadius="12px";
+    box.appendChild(v);
+  }else{
+    box.innerHTML = `
+      <div class="muted">Arquivo anexado.</div>
+      <div style="height:10px"></div>
+      <a class="btn primary" download="${escapeHTML(file.name)}" href="${file.data}" style="display:inline-block;text-decoration:none">Baixar</a>
+    `;
+  }
+
+  wrap.appendChild(box);
+  UI.modal(true,{title:"Arquivo", body:wrap, foot:[UI.btn("Fechar","primary", ()=>UI.modal(false))]});
+}
+
+/* Export */
+async function exportCompany(company){
+  if(!company){ UI.toast("Empresa inválida."); return; }
+  if(company.pinHash){
+    const ok = await gateByMaster(company);
+    if(!ok) return;
+  }
+  const payload = { version:1, exportedAt: nowISO(), company };
+  const js = buildExportJS(payload);
+
+  const blob = new Blob([js], {type:"text/javascript;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+
+  const safe = (company.name||"Cais").replace(/[^\w\-]+/g,"_");
+  const a=document.createElement("a");
+  a.download = `Cais_${safe}${CAIS_EXPORT_EXT}`;
+  a.href = url;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+}
+
+/* file -> dataURL */
+function fileToDataURL(file){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>resolve(r.result);
+    r.onerror=()=>reject(r.error);
+    r.readAsDataURL(file);
+  });
+}
+
+/* small */
+function escapeHTML(s){
+  return String(s||"")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+/* Render */
+function render(){
+  const view=UI.el("view");
+  view.innerHTML="";
+  const r=store.route.name;
+
+  if(r==="home") view.appendChild(viewHome());
+  else if(r==="imports") view.appendChild(viewImports());
+  else if(r==="importFolder") view.appendChild(viewImportFolder());
+  else if(r==="companyDash") view.appendChild(viewCompanyDash());
+  else if(r==="go") view.appendChild(viewGo());
+  else if(r==="setup") view.appendChild(viewSetup());
+  else view.appendChild(viewHome());
+}
+
+/* Boot */
+(function boot(){
+  applyTheme(getTheme());
+  migrateData();
+
+  const nightBtn = document.getElementById("nightToggle");
+  if(nightBtn) nightBtn.addEventListener("click", toggleTheme);
+
+  const splash = UI.el("splash");
+  const app = UI.el("app");
+  setTimeout(()=>{
+    splash.classList.add("hide");
+    app.style.display="flex";
+    render();
+  }, 700);
+})();
+</script>
 </body>
 </html>
+```
